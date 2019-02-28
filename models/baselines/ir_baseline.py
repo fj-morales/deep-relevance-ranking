@@ -234,8 +234,8 @@ if defaults == 'yes':
     brange = [0.75]
     krange = [1.2]
 else:
-    brange = np.arange(0.4,0.9,0.2)
-    krange = np.arange(0.5,2,0.3)
+    brange = np.arange(0.2,1,0.1)
+    krange = np.arange(0.5,2,0.1)
 for b in brange:
     b = round(b,2)
     for k in krange:
