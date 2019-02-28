@@ -21,7 +21,7 @@ import numpy as np
 dataloc = '../../bioasq_data/'
 # dataloc = '../../robust04_data/split_3/'
 baseline_files ='./baseline_files/'
-galago_loc='~/galago-3.10-bin/bin/'
+galago_loc='./galago-3.10-bin/bin/'
 
 
 # In[55]:
