@@ -12,7 +12,7 @@ import gzip
 import os
 import subprocess
 import numpy as np
-
+import multiprocessing
 
 # In[78]:
 
@@ -188,7 +188,7 @@ elif "bioasq" in output_file:
 
 index_loc = baseline_files + 'index' + '_' + dataset_name + '_' + data_split
 index_input = output_file
-build_index(index_input, index_loc)
+# build_index(index_input, index_loc)
 
 
 # In[65]:
@@ -228,37 +228,56 @@ print(index_loc)
 
 # In[ ]:
 
+def bm25_computing(b_k):
+    b = b_k[0]
+    k = b_k[1]
+    bm25_preds_file = baseline_files + 'bm25_preds_' + dataset_name + '_'+ data_split + '_' + 'b' + str(b) + 'k' + str(k) + '.json'
+    print(bm25_preds_file)
+    if os.path.isfile(bm25_preds_file):
+        print(bm25_preds_file + "...done!")
+        return
+    bm25_preds = {}
+    questions = []
+    question = {}
+    for query in query_data['questions']:
+        question['body'] = query['body']
+        question['id'] = query['id']
+    #     print(query['body'].rstrip('.'))
+    #     documents = get_bm25_docs(query['body'].rstrip('.'), index_loc)
+        documents = get_bm25_docs(query['body'], index_loc, b, k)
+        if "bioasq" in dataset_name: 
+            documents_url = ['http://www.ncbi.nlm.nih.gov/pubmed/' + doc for doc in documents]
+            question['documents'] = documents_url
+        elif "rob04" in dataset_name:
+            question['documents'] = documents
+        questions.append(dict(question))
+    
+    bm25_preds['questions'] = questions
+    save_preds(bm25_preds_file, bm25_preds)    
 
-defaults = 'yes'
-if defaults == 'yes':
-    brange = [0.75]
-    krange = [1.2]
-else:
-    brange = np.arange(0.2,1,0.1)
-    krange = np.arange(0.5,2,0.1)
-for b in brange:
-    b = round(b,2)
-    for k in krange:
-        k = round(k,2)
-        bm25_preds = {}
-        questions = []
-        question = {}
-        for query in query_data['questions']:
-            question['body'] = query['body']
-            question['id'] = query['id']
-        #     print(query['body'].rstrip('.'))
-        #     documents = get_bm25_docs(query['body'].rstrip('.'), index_loc)
-            documents = get_bm25_docs(query['body'], index_loc, b, k)
-            if "bioasq" in dataset_name: 
-                documents_url = ['http://www.ncbi.nlm.nih.gov/pubmed/' + doc for doc in documents]
-                question['documents'] = documents_url
-            elif "rob04" in dataset_name:
-                question['documents'] = documents
-            questions.append(dict(question))
-        bm25_preds_file = baseline_files + 'bm25_preds_' + 'b' + str(b) + 'k' + str(k) + '_'+ dataset_name + '_'+ data_split + '.json'
-        bm25_preds['questions'] = questions
-        save_preds(bm25_preds_file, bm25_preds)    
+def start_process():
+    print( 'Starting', multiprocessing.current_process().name)
 
+# Multiprocessing for testing different bb and k
+
+if __name__ == '__main__':
+    defaults = 'no'
+    if defaults == 'yes':
+        brange = [0.75]
+        krange = [1.2]
+    else:
+        brange = np.arange(0.2,1,0.1)
+        krange = np.arange(0.5,2,0.1)
+    b_k = [(round(b,2), round(k,2)) for b in brange for k in krange]
+    print(b_k[0][0])
+
+    pool_size = 8
+    pool = multiprocessing.Pool(processes=pool_size,
+                                initializer=start_process,
+                                )
+    pool_outputs = pool.map(bm25_computing, b_k)
+    pool.close() # no more tasks
+    pool.join()  # wrap up current tasks
 
 # ## Experiments (remove safely)
 

@@ -1,0 +1,2 @@
+
+(xfce4-terminal:899): Gdk-CRITICAL **: 08:18:24.176: gdk_window_get_window_type: assertion 'GDK_IS_WINDOW (window)' failed
