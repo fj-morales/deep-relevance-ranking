@@ -18,8 +18,8 @@ import multiprocessing
 
 
 # Define paths
-dataloc = '../../bioasq_data/'
-# dataloc = '../../robust04_data/split_3/'
+#dataloc = '../../bioasq_data/'
+dataloc = '../../robust04_data/split_4/'
 baseline_files ='./baseline_files/'
 galago_loc='./galago-3.10-bin/bin/'
 
