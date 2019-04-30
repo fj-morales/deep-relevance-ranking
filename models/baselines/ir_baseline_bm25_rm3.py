@@ -481,7 +481,7 @@ def bm25_computing(params):
         golden_file = dataloc + 'rob04.' + data_split + '.' + s[0]   + '.json'
     else:
         golden_file = dataloc + dataset_name_ext + '.' + data_split + '.json'
-    
+#     print(golden_file)
     if os.path.exists(golden_file):
 #         print('yes, we can evaluate!')    
 #         print(golden_file)    
@@ -573,11 +573,16 @@ def find_best_dev_model(best_model_params_file, random_iterations = 5000):
     while (True):
         if (pool_outputs.ready()): break
         remaining = pool_outputs._number_left
-        time.sleep(2)
-        print("Waiting for", remaining, "tasks to complete...")
+#         remaining2 = remaining1
+#         remaining1 = pool_outputs._number_left
+        if remaining%10 == 0:
+            print("Waiting for", remaining, "tasks to complete...")
+            time.sleep(2)
+        
       
     pool.join()  # wrap up current tasks
     pool_outputs.get()
+    print('Total parameters: ' + str(len(pool_outputs.get())))
     best_model_params = max(pool_outputs.get(), key=lambda x: x[5])
     
     best_model_dict = {
