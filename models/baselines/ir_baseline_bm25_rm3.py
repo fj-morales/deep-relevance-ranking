@@ -582,6 +582,8 @@ def find_best_dev_model(best_model_params_file, random_iterations = 5000):
       
     pool.join()  # wrap up current tasks
     pool_outputs.get()
+    params_file = './best_ir_model/' + dataset_name_ext + '_' + 'bm25_rm3_' + split + '_hparams.pickle'
+    pickle.dump(pool_outputs.get(), open(params_file, "wb" ) )
     print('Total parameters: ' + str(len(pool_outputs.get())))
     best_model_params = max(pool_outputs.get(), key=lambda x: x[5])
     
@@ -637,7 +639,7 @@ def get_test_metrics(best_model_params_file):
 if __name__ == '__main__':
 
     try:
-        dataloc = sys.argv[1]
+        dataloc = sys.argv[1] + '/'
         print(dataloc)
         split = sys.argv[2]
         
@@ -775,8 +777,10 @@ if __name__ == '__main__':
     ## best_model_params_file = baseline_files + dataset_name_ext + '_bm25_rm3_best_model_'+ split + '.json'
     ## find_best_dev_model(best_model_params_file, 2)
     if 'dev' in split:
+        print('Dev Mode')
         find_best_dev_model(best_model_params_file, int(random_iter))
     if 'test' in split:
+        print('Test Mode')
         test_results = get_test_metrics(best_model_params_file)
         print(test_results)
     
