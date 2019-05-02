@@ -106,6 +106,7 @@ def build_index(index_input, index_loc, log_file):
                            anserini_index,
                            '-collection',
                            'TrecCollection',
+                        '-uniqueDocid',
                            '-generator',
                            'JsoupGenerator',
                            '-threads',
@@ -200,13 +201,13 @@ def retrieve_docs(q_topics_file, retrieved_docs_file, index_loc, b_val=0.2, k_va
                 str(b_val),
                 '-k1',
                 str(k_val),
-                '-rm3',
-                '-rm3.fbDocs',
-                str(n_docs),
-                '-rm3.fbTerms',
-                str(n_terms),
-                '-rm3.originalQueryWeight',
-                str(w_ori_q),
+#                 '-rm3',
+#                 '-rm3.fbDocs',
+#                 str(n_docs),
+#                 '-rm3.fbTerms',
+#                 str(n_terms),
+#                 '-rm3.originalQueryWeight',
+#                 str(w_ori_q),
                 '-hits',
                 str(hits)
                ]
@@ -766,12 +767,16 @@ if __name__ == '__main__':
     [q_dict, q_trec, ids_dict]= generate_queries_file(queries,bm25_queries_file)
 
     q_topic_filename = dataset_name_ext + '_' + 'query_topics'  + '_' + data_split + '.txt'
+    ids_equivalence_filename = dataset_name_ext + '_' + 'ids_quivalence'  + '_' + data_split + '.txt'
     q_topics_file = baseline_files + q_topic_filename
     trec_q_topics_file = trec_storage + q_topic_filename
+    ids_equivalence_file = trec_storage + ids_equivalence_filename
 
     to_trecfile(q_trec, q_topics_file, compression = 'no')
     to_trecfile(q_trec, trec_q_topics_file, compression = 'no')
     
+    with open(ids_equivalence_file, 'wt') as outfile:
+        json.dump(ids_dict, outfile)
     
     best_model_params_file = baseline_files + dataset_name_ext + '_bm25_rm3_best_model_dev.json'
     ## best_model_params_file = baseline_files + dataset_name_ext + '_bm25_rm3_best_model_'+ split + '.json'
