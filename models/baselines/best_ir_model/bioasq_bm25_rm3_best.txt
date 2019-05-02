@@ -1,0 +1,6 @@
+../../bioasq_data/
+No need for random iterations in test mode.
+test
+bioasq
+Test Mode
+['0.15', '0.2', '310', '342', '0.6', 0.4823, 0.2686, 0.5462]
