@@ -743,8 +743,8 @@ if __name__ == '__main__':
     index_input = corpus_files
     log_file = baseline_files + 'log_index_' + dataset_name_ext + '_' + data_split
 
-    if build_index_flag == 'yes':
-        build_index(index_input, index_loc, log_file)
+#     if build_index_flag == 'yes':
+#         build_index(index_input, index_loc, log_file)
 
     #     build_index(index_input, index_loc)
     
@@ -784,10 +784,10 @@ if __name__ == '__main__':
     ## find_best_dev_model(best_model_params_file, 2)
     if 'dev' in split:
         print('Dev Mode')
-        find_best_dev_model(best_model_params_file, int(random_iter))
+#         find_best_dev_model(best_model_params_file, int(random_iter))
     if 'test' in split:
         print('Test Mode')
-        test_results = get_test_metrics(best_model_params_file)
+#         test_results = get_test_metrics(best_model_params_file)
         print(test_results)
     
     
