@@ -669,7 +669,7 @@ if __name__ == '__main__':
     # build_index_flag = 'no'
 
     # N of workers for multiprocessing used random_search
-    pool_size = 20
+    pool_size = sys.argv[4]# 20
 
     hits = 100
     
