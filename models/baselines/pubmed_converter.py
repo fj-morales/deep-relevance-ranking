@@ -42,12 +42,8 @@ def get_filenames(data_dir):
 
 
 def make_folder(folder):
-    if os.path.exists(folder):
-        shutil.rmtree(folder)
+    if not os.path.exists(folder):
         os.makedirs(folder)
-    else:
-        os.makedirs(folder)
-
 
 # In[5]:
 
@@ -60,7 +56,11 @@ def xml_to_trec(root):
         try:
             PMID = MedlineCitation.find('PMID').text
             title = MedlineCitation.find('Article/ArticleTitle').text
-            abstractText = MedlineCitation.find('Article/Abstract/AbstractText').text
+            abstractTextsObjects = MedlineCitation.findall('Article/Abstract/AbstractText')
+            abstractTexts = [x.text for x in abstractTextsObjects]
+            abstractText = " ".join(abstractTexts)
+            if len(abstractText) == 0: 
+                continue
         except:
             continue
 #         try:
@@ -68,9 +68,17 @@ def xml_to_trec(root):
 #         except:
 #             pubDate_year = None
 
+        if (PMID is None) | (title is None) | (abstractText is None):
+            print(PMID)
+            print(title)
+            print(abstractText)
+            print(MedlineCitation.findall('Article/Abstract/AbstractText'))
+            break
+        
+
         trec_doc = '<DOC>\n' +               '<DOCNO>' + PMID + '</DOCNO>\n' +               '<TITLE>' + title + '</TITLE>\n' +               '<TEXT>' + abstractText + '</TEXT>\n' +               '</DOC>\n'
         trec_docs[PMID] = trec_doc
-        
+
     return trec_docs
 
 
@@ -79,13 +87,13 @@ def xml_to_trec(root):
 
 def save_trecfile(docs, filename, compression = 'yes'):
     # Pickle to Trectext converter
+    print('Preparing to save:', filename)
     if compression == 'yes':
         with gzip.open(filename,'wt') as f_out:
             
             for key, value in docs.items():
                 f_out.write(value.encode('utf8'))
     else:
-       # print(filename)
         with open(filename,'wt') as f_out:
             
             for key, value in docs.items():
@@ -112,24 +120,30 @@ def start_process():
 
 def pubmed_xml_to_json(xml_file):
 
-    # Read ZIP file
-    xml_str = xml_file
-#     print('xml_str... done!')
-    # Parse to root object
-    tree = ET.parse(xml_str)
-    root = tree.getroot()
-    
-#     print('Root xml_str... done!')
-    # Convert to Trec docs
-    trec_docs = xml_to_trec(root)
-    
 #     print('Trec_docs... generated!')
     # Gen trec filename
     trec_file = trec_filename_gen(xml_file)
+
+    if os.path.exists(trec_file):
+#         pass
+        print(trec_file, ' Already exists... skip!')
+    else:
+        print(trec_file, ' processing...')
+    	# Read ZIP file
+    	xml_str = xml_file
+        print('xml_str... done!')
+    # Parse to root object
+    	tree = ET.parse(xml_str)
+    	root = tree.getroot()
+    
+        print('Root xml_str... done!')
+    # Convert to Trec docs
+    	trec_docs = xml_to_trec(root)
+    
     
 #     print('Trec_file... saved!!')
     # Save as TREC (Anserini) doc index input file
-    save_trecfile(trec_docs, trec_file, compression = 'no')
+    	save_trecfile(trec_docs, trec_file, compression = 'no')
 
 
 # In[16]:
@@ -137,7 +151,7 @@ def pubmed_xml_to_json(xml_file):
 
 if __name__ == '__main__':
 
-    pool_size = 5
+    pool_size = 3
     # Get all filenames
     data_dir = '/ssd/francisco/pubmed19/'
     to_index_dir = './baseline_files/corpus_files/'
