@@ -55,10 +55,13 @@ def xml_to_trec(root):
         doc = {}
         try:
             PMID = MedlineCitation.find('PMID').text
-            title = MedlineCitation.find('Article/ArticleTitle').text
-            abstractTextsObjects = MedlineCitation.findall('Article/Abstract/AbstractText')
-            abstractTexts = [x.text for x in abstractTextsObjects]
-            abstractText = " ".join(abstractTexts)
+            title_obj = MedlineCitation.find('Article/ArticleTitle')
+            title = "".join(title_obj.itertext())
+            abstractTexts_obj = MedlineCitation.findall('Article/Abstract/AbstractText')
+            abstractTexts_iters = [x.itertext() for x in abstractTexts_obj]
+#             print(abstractTexts_iters)
+            abstractText = [" ".join(x) for x in abstractTexts_iters]
+            abstractText = " ".join(abstractText)
             if len(abstractText) == 0: 
                 continue
         except:
@@ -69,10 +72,10 @@ def xml_to_trec(root):
 #             pubDate_year = None
 
         if (PMID is None) | (title is None) | (abstractText is None):
-            print(PMID)
-            print(title)
-            print(abstractText)
-            print(MedlineCitation.findall('Article/Abstract/AbstractText'))
+            print('PMID: ',PMID)
+            print('title: ',title)
+            print('abstractText :' ,abstractText)
+            print('All abstract objects: ',MedlineCitation.findall('Article/Abstract/AbstractText'))
             break
         
 
@@ -80,6 +83,7 @@ def xml_to_trec(root):
         trec_docs[PMID] = trec_doc
 
     return trec_docs
+
 
 
 # In[17]:
@@ -151,7 +155,7 @@ def pubmed_xml_to_json(xml_file):
 
 if __name__ == '__main__':
 
-    pool_size = 3
+    pool_size = 10
     # Get all filenames
     data_dir = '/ssd/francisco/pubmed19/'
     to_index_dir = './baseline_files/corpus_files/'
