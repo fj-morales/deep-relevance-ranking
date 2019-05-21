@@ -182,6 +182,8 @@ def generate_queries_file(queries, filename):
 
 def retrieve_docs(q_topics_file, retrieved_docs_file, index_loc, b_val=0.2, k_val=0.8, n_docs=10, n_terms=10, w_ori_q=0.5, hits=100):
     
+#     print(b_val, k_val, n_docs, n_terms, w_ori_q)
+#     sys.exit()
     anserini_search = anserini_loc + 'target/appassembler/bin/SearchCollection'
 #     print(b_val)
     command = [ 
@@ -469,7 +471,16 @@ def bm25_computing(params):
     if os.path.isfile(bm25_preds_file):
         print(bm25_preds_file + "Already exists!!")
 #         return
+
     retrieved_docs_file = baseline_files + 'run_bm25_rm3_preds_' + dataset_name_ext + '_' + data_split + '_' + params_suffix + '.txt'
+    
+    
+    if not os.path.exists(retrieved_docs_file):
+    ####    retrieve_docs(q_topics_file, retrieved_docs_file, all_index_dir, hits, b, k, N, M, Lambda)
+        retrieve_docs(q_topics_file, retrieved_docs_file, index_loc,b, k, N, M, Lambda, hits)
+    else:
+        print('File already exists, skip retrieval!: ', retrieved_docs_file)
+    
 #     retrieved_docs_file = './baseline_files/run_bm25_rm3_preds_bioasq_dev_b0.65k0.4N409M248Lambda0.4.txt'
 #     retrieved_docs_file = './baseline_files/run_bm25_rm3_preds_bioasq_dev.txt'
     #print(b)
@@ -556,6 +567,8 @@ def find_best_dev_model(best_model_params_file, random_iterations = 5000):
                   for b in brange for k in krange for N in N_range for M in M_range for Lambda in lamb_range]
    
     print('# Params: ', len(params)) 
+    print('Params: ', params) 
+#     return
 #     pool_size = 20
 #     print(len(params))
     pool = multiprocessing.Pool(processes=pool_size,
