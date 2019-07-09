@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 # import pickle
@@ -37,7 +37,7 @@ import bioasq_query_parser
 # from utils import *
 
 
-# In[2]:
+# In[ ]:
 
 
 class Index:
@@ -67,7 +67,7 @@ class Index:
             return 'Ok'
 
 
-# In[3]:
+# In[ ]:
 
 
 class Query:
@@ -101,7 +101,7 @@ class Query:
 #             return 'Ok'
 
 
-# In[4]:
+# In[ ]:
 
 
 def eval(trec_eval_command, qrel, qret):
@@ -128,7 +128,7 @@ def eval(trec_eval_command, qrel, qret):
         return 'Ok'
 
 
-# In[5]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -154,9 +154,7 @@ if __name__ == "__main__":
     
     
     
-#     bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size)
-
-
+    bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size)
 
     
     # Generate query files
@@ -170,8 +168,8 @@ if __name__ == "__main__":
     
     
     
-#     index_data = Index(ir_toolkit_location, parameter_file_location)
-#     index_data.build()
+    index_data = Index(ir_toolkit_location, parameter_file_location)
+    index_data.build()
     
     
     
