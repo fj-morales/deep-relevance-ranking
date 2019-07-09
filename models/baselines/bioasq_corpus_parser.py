@@ -10,6 +10,7 @@ import datetime
 import xml.etree.ElementTree as ET
 import gzip
 import os
+import json
 import subprocess
 
 import multiprocessing
@@ -88,7 +89,6 @@ def xml_to_trec(root):
         trec_doc = '<DOC>\n' + '<DOCNO>' + PMID + '</DOCNO>\n' + '<TITLE>' + title + '</TITLE>\n' + '<TEXT>' + abstractText + '</TEXT>\n' + '<YEAR>' + pubDate_year + '</YEAR>\n' + '</DOC>\n'
         trec_docs[PMID] = trec_doc
         doc_year[PMID] = pubDate_year
-    print(len(doc_year))
     return [trec_docs, doc_year] 
 
 
@@ -134,7 +134,9 @@ def pubmed_xml_to_json(xml_file):
 #     print('Trec_docs... generated!')
     # Gen trec filename
     trec_file = trec_filename_gen(xml_file)
-    doc_year_file = trec_file.split('_')[0] + '_doc_year'
+    doc_year_file = trec_file.rstrip('.txt') + '_year'
+    print(doc_year_file)
+#     doc_year_file = './doc_year'
 
     if os.path.exists(trec_file):
 #         pass
@@ -151,14 +153,15 @@ def pubmed_xml_to_json(xml_file):
         print('Root xml_str... done!')
         # Convert to Trec docs
         [trec_docs, doc_year]= xml_to_trec(root)
-        print(len(trec_docs))
 
 
         #     print('Trec_file... saved!!')
         # Save as TREC (Anserini) doc index input file
         save_trecfile(trec_docs, trec_file, compression = 'no')
+#         print(doc_year.keys())
+        jstring = json.dumps(doc_year, indent = 4)
         with open(doc_year_file, 'wt') as doc_year_f:
-            json.dump(doc_year, doc_year_file, indent=4)
+            doc_year_f.write(jstring)
 
 # In[16]:
 
