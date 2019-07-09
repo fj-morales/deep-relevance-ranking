@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 # import pickle
@@ -37,7 +37,7 @@ import bioasq_query_parser
 # from utils import *
 
 
-# In[ ]:
+# In[2]:
 
 
 class Index:
@@ -67,7 +67,7 @@ class Index:
             return 'Ok'
 
 
-# In[ ]:
+# In[3]:
 
 
 class Query:
@@ -88,21 +88,20 @@ class Query:
                                 query_command,
                                 self.query_file,
                                 self.query_parameter_file,
-                                stopwords_file,
-                                '>',
-                                self.run_filename]
+                                stopwords_file]
+                                
 
         print(toolkit_parameters)
-
-        proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+        rf = open(self.run_filename, 'wt') 
+        proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=rf, stderr=subprocess.STDOUT, shell=False)
         (out, err) = proc.communicate()
-        print(out.decode("utf-8"))
-        print('Run error: ', err)
-        if err == None:
-            return 'Ok'
+#         print(out.decode("utf-8"))
+#         print('Run error: ', err)
+#         if err == None:
+#             return 'Ok'
 
 
-# In[80]:
+# In[4]:
 
 
 def eval(trec_eval_command, qrel, qret):
@@ -122,14 +121,14 @@ def eval(trec_eval_command, qrel, qret):
     print(toolkit_parameters)
 
     proc = subprocess.Popen(toolkit_parameters, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
-    (out, error) = proc.communicate()
+    (out, err) = proc.communicate()
     print(out.decode("utf-8"))
     print('Run error: ', err)
     if err == None:
         return 'Ok'
 
 
-# In[ ]:
+# In[5]:
 
 
 if __name__ == "__main__":
@@ -151,8 +150,14 @@ if __name__ == "__main__":
     index_dir = workdir + dataset + '_indri_index'
     utils.create_dir(to_index_dir)
     utils.create_dir(index_dir)
-    bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size)
     
+    
+    
+    
+#     bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size)
+
+
+
     
     # Generate query files
     
@@ -161,8 +166,16 @@ if __name__ == "__main__":
     trec_eval_command = '../../eval/trec_eval'
     parameter_file_location = workdir + 'bioasq_index_param_file'
     
-    index_data = Index(ir_toolkit_location, parameter_file_location)
-    index_data.build()
+    
+    
+    
+    
+#     index_data = Index(ir_toolkit_location, parameter_file_location)
+#     index_data.build()
+    
+    
+    
+    
     
     # Generate qrels and qret
     
