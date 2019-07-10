@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 # import pickle
-# import json
+import json
 # import gzip
-# import os
+import os
 import subprocess
 # import numpy as np
 # import multiprocessing
@@ -37,7 +37,7 @@ import bioasq_query_parser
 # from utils import *
 
 
-# In[ ]:
+# In[2]:
 
 
 class Index:
@@ -67,7 +67,7 @@ class Index:
             return 'Ok'
 
 
-# In[ ]:
+# In[3]:
 
 
 class Query:
@@ -89,19 +89,19 @@ class Query:
                                 self.query_file,
                                 self.query_parameter_file,
                                 stopwords_file]
-                                
-
         print(toolkit_parameters)
-        rf = open(self.run_filename, 'wt') 
-        proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=rf, stderr=subprocess.STDOUT, shell=False)
-        (out, err) = proc.communicate()
-#         print(out.decode("utf-8"))
-#         print('Run error: ', err)
-#         if err == None:
-#             return 'Ok'
+        with open(self.run_filename, 'wt') as rf:
+#             proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=rf, stderr=subprocess.STDOUT, shell=False)
+            proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+            proc2 = subprocess.Popen(['grep', '^.*[ ]Q0[ ]'],stdin=proc.stdout, stdout=rf, stderr=subprocess.STDOUT, shell=False)
+#             (out, err)= proc2.communicate()
+#             print(out.splitlines()[0:10])
+    #         print('Run error: ', err)
+    #         if err == None:
+    #             return 'Ok'
 
 
-# In[ ]:
+# In[4]:
 
 
 def eval(trec_eval_command, qrel, qret):
@@ -145,7 +145,12 @@ if __name__ == "__main__":
     
     pool_size = 40 # scales very well when server is not used
     # Get all filenames
+    
+    # Options
+#     data_dir = '/ssd/francisco/pubmed19-test/'
     data_dir = '/ssd/francisco/pubmed19/'
+    
+    
     to_index_dir =  workdir + dataset + '_corpus/'
     index_dir = workdir + dataset + '_indri_index'
     utils.create_dir(to_index_dir)
@@ -157,45 +162,107 @@ if __name__ == "__main__":
     bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size)
 
     
-    # Generate query files
+
+
+# In[ ]:
+
+
+# Generate query files
+
+
+ir_toolkit_location = '../../../indri/'
+trec_eval_command = '../../eval/trec_eval'
+parameter_file_location = workdir + 'bioasq_index_param_file'
+
+
+
+
+
+index_data = Index(ir_toolkit_location, parameter_file_location)
+index_data.build()
+
+
+
+
+
+# Generate qrels and qret
+
+queries_file = '../../bioasq_data/bioasq.test.json'
+
+prefix = queries_file.split('/')[-1].strip('.json')
+filename_prefix = workdir + prefix
+
+print(filename_prefix)
+
+trec_query_file = filename_prefix + '_trec_query'
+qrels_file = filename_prefix + '_qrels'
+
+bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file)
+
+# Run query
+
+
+run_filename = workdir + 'run_' + prefix
+query_parameter_file = workdir + dataset + '_query_params'
+bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename)
+bm25_query.run()
+
+# Eval
+eval(trec_eval_command, qrels_file, run_filename)
+
+
+# In[ ]:
+
+
+# Specific for BioASQ
+# for BioASQ only
+
+def rfile_dict(run_filename):
+    with open(run_filename, 'rt') as rf:
+        run_dict = {}
+        for line in rf:
+            elem = line.split(' ')
+            q_id = elem[0]
+            doc = elem[2]
+            doc_rank = elem[3]
+            doc_score = elem[4]
+            docu = [q_id, doc, doc_rank, doc_score]
+            if q_id in run_dict:
+                run_dict[q_id].append(docu)
+            else:
+                run_dict[q_id] = [docu]
+        return run_dict
+
+
+# In[ ]:
+
+
+# Specific for BioASQ
+# for BioASQ only
+
+def get_doc_year(corpus_dir):
+    doc_year_files = [os.path.join('./',root, name)
+             for root, dirs, files in os.walk(corpus_dir)
+             for name in files
+             if all(y in name for y in ['year'])]
+#     print(doc_year_files)
     
-    
-    ir_toolkit_location = '../../../indri/'
-    trec_eval_command = '../../eval/trec_eval'
-    parameter_file_location = workdir + 'bioasq_index_param_file'
-    
-    
-    
-    
-    
-    index_data = Index(ir_toolkit_location, parameter_file_location)
-    index_data.build()
-    
-    
-    
-    
-    
-    # Generate qrels and qret
-    
-    queries_file = '../../bioasq_data/bioasq.test.json'
-    
-    prefix = queries_file.split('/')[-1].strip('.json')
-    filename_prefix = workdir + prefix
-    
-    print(filename_prefix)
-    
-    trec_query_file = filename_prefix + '_trec_query'
-    qrels_file = filename_prefix + '_qrels'
-    
-    bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file)
-    
-    # Run query
-    
-    run_filename = workdir + 'run_' + prefix
-    query_parameter_file = workdir + dataset + '_query_params'
-    bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename)
-    bm25_query.run()
-    
-    # Eval
-    eval(trec_eval_command, qrels_file, run_filename)
+    doc_years_dict = {}
+    for doc_year in doc_year_files:
+        with open(doc_year, 'rt') as dy_f:
+            dy_dict = json.load(dy_f)
+            doc_years_dict.update(dy_dict)
+    return doc_years_dict
+
+
+# In[ ]:
+
+
+dyears = get_doc_year(to_index_dir)
+
+
+# In[ ]:
+
+
+len(dyears)
 
