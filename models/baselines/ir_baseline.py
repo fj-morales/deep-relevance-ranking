@@ -147,8 +147,8 @@ if __name__ == "__main__":
     # Get all filenames
     
     # Options
-    data_dir = '/ssd/francisco/pubmed19-test/'
-#     data_dir = '/ssd/francisco/pubmed19/'
+#     data_dir = '/ssd/francisco/pubmed19-test/'
+    data_dir = '/ssd/francisco/pubmed19/'
     
     
     to_index_dir =  workdir + dataset + '_corpus/'
