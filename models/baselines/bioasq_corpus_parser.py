@@ -61,7 +61,10 @@ def xml_to_trec(root):
             title = "".join(title_obj.itertext())
             abstractTexts_obj = MedlineCitation.findall('Article/Abstract/AbstractText')
             abstractTexts_iters = [x.itertext() for x in abstractTexts_obj]
-            pubDate_year = MedlineCitation.find('Article/Journal/JournalIssue/PubDate/Year').text
+            try:
+                pubDate_year = MedlineCitation.find('Article/Journal/JournalIssue/PubDate/Year').text
+            except:
+                pubDate_year = '0'
 #             print(abstractTexts_iters)
             abstractText = [" ".join(x) for x in abstractTexts_iters]
             abstractText = " ".join(abstractText)
@@ -77,12 +80,11 @@ def xml_to_trec(root):
 #         except:
 #             pubDate_year = None
 
-        if (PMID is None) | (title is None) | (abstractText is None) | (pubDate_year is None):
+        if (PMID is None) | (title is None) | (abstractText is None):
             print('PMID: ',PMID)
             print('title: ',title)
             print('abstractText :' ,abstractText)
             print('All abstract objects: ',MedlineCitation.findall('Article/Abstract/AbstractText'))
-            print('pubDate_year :' ,pubDate_year)
             break
         
 
