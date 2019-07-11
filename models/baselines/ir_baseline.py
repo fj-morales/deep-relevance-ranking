@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 # import pickle
@@ -37,7 +37,7 @@ import bioasq_query_parser
 # from utils import *
 
 
-# In[2]:
+# In[ ]:
 
 
 class Index:
@@ -67,7 +67,7 @@ class Index:
             return 'Ok'
 
 
-# In[3]:
+# In[ ]:
 
 
 class Query:
@@ -101,7 +101,7 @@ class Query:
                 return 'Ok'
 
 
-# In[4]:
+# In[ ]:
 
 
 def eval(trec_eval_command, qrel, qret):
@@ -128,112 +128,7 @@ def eval(trec_eval_command, qrel, qret):
         return 'Ok'
 
 
-# In[5]:
-
-
-if __name__ == "__main__":
-    
-#     ir_toolkit_location = sys.argv[1] # '../indri/'
-#     parameter_file_location = sys.argv[2] # './bioasq_index_param_file'
-
-    # create dataset files dir
-    
-    dataset = 'bioasq'
-    workdir = './' + dataset + '_dir/'
-    
-    # generate corpus files to index
-    
-    pool_size = 40 # scales very well when server is not used
-    # Get all filenames
-    
-    # Options
-#     data_dir = '/ssd/francisco/pubmed19-test/'
-    data_dir = '/ssd/francisco/pubmed19/'
-    
-    
-    to_index_dir =  workdir + dataset + '_corpus/'
-    index_dir = workdir + dataset + '_indri_index'
-    utils.create_dir(to_index_dir)
-    utils.create_dir(index_dir)
-    
-    
-    
-    
-    bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size)
-
-    
-
-    # Generate query files
-    
-    
-    ir_toolkit_location = '../../../indri/'
-    trec_eval_command = '../../eval/trec_eval'
-    parameter_file_location = workdir + 'bioasq_index_param_file'
-    
-    
-    
-    
-    
-    index_data = Index(ir_toolkit_location, parameter_file_location)
-    index_data.build()
-    
-    
-    
-    
-    
-    # Generate qrels and qret
-    
-    queries_file = '../../bioasq_data/bioasq.test.json'
-    
-    prefix = queries_file.split('/')[-1].strip('.json')
-    filename_prefix = workdir + prefix
-    
-    print(filename_prefix)
-    
-    trec_query_file = filename_prefix + '_trec_query'
-    qrels_file = filename_prefix + '_qrels'
-    
-    bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file)
-    
-    # Run query
-    
-
-    run_filename = workdir + 'run_' + prefix
-    query_parameter_file = workdir + dataset + '_query_params'
-    
-
-    bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename)
-    bm25_query.run()
-    
-
-    # Eval
-    eval(trec_eval_command, qrels_file, run_filename)
-
-
-# In[9]:
-
-
-# Specific for BioASQ
-# for BioASQ only
-
-def rfile_dict(run_filename):
-    with open(run_filename, 'rt') as rf:
-        run_dict = {}
-        for line in rf:
-            elem = line.split(' ')
-            q_id = elem[0]
-            doc = elem[2]
-            doc_rank = elem[3]
-            doc_score = elem[4]
-            docu = [q_id, doc, doc_rank, doc_score]
-            if q_id in run_dict:
-                run_dict[q_id].append(docu)
-            else:
-                run_dict[q_id] = [docu]
-        return run_dict
-
-
-# In[10]:
+# In[ ]:
 
 
 # Specific for BioASQ
@@ -254,14 +149,130 @@ def get_doc_year(corpus_dir):
     return doc_years_dict
 
 
-# In[11]:
+# In[ ]:
 
 
-dyears = get_doc_year(to_index_dir)
+# Specific for BioASQ
+# for BioASQ only
+
+def filter_year(run_filename, run_filename_filtered, doc_years_dict):
+    if 'train' in run_filename:
+        filter_year = 2015
+    else:
+        filter_year = 2016
+    with open(run_filename, 'rt') as rf:
+        run_dict = {}
+        doc_rank = 0
+        for line in rf:
+
+            elem = line.split(' ')
+            q_id = elem[0]
+            doc = elem[2]
+            
+            doc_score = elem[4]
+            doc_year = doc_years_dict[doc]            
+            if int(doc_year) <= filter_year:
+                if q_id in run_dict:
+                    doc_rank += 1
+                    if doc_rank == 100:
+                        pass
+#                         print('orig: ', elem[3])                        
+                    if doc_rank > 100:
+                        continue
+                    docu = [q_id, doc, doc_rank, doc_score, doc_year]
+                    run_dict[q_id].append(docu)
+                else:
+                    if doc_rank < 100:
+                        try: 
+#                             print('previous: ',  docu)
+                            pass
+                        except: 
+                            pass
+                    doc_rank = 1
+                    docu = [q_id, doc, doc_rank, doc_score, doc_year]
+                    run_dict[q_id] = [docu]
+
+        with open(run_filename_filtered, 'wt') as filter_f:
+            for key, value in run_dict.items():
+                for val in value:
+                    filter_f.write(val[0] + ' Q0 ' + val[1] + ' ' + str(val[2]) + ' ' + str(val[3]) + ' indri\n')
 
 
-# In[12]:
+# In[ ]:
 
 
-len(dyears)
+if __name__ == "__main__":
+    
+# #     ir_toolkit_location = sys.argv[1] # '../indri/'
+# #     parameter_file_location = sys.argv[2] # './bioasq_index_param_file'
+
+#     # create dataset files dir
+    
+    dataset = 'bioasq'
+    workdir = './' + dataset + '_dir/'
+    
+#     # generate corpus files to index
+    
+    pool_size = 40 # scales very well when server is not used
+#     # Get all filenames
+    
+#     # Options
+#     data_dir = '/ssd/francisco/pubmed19-test/'
+    data_dir = '/ssd/francisco/pubmed19/'
+    
+    
+    to_index_dir =  workdir + dataset + '_corpus/'
+    index_dir = workdir + dataset + '_indri_index'
+    utils.create_dir(to_index_dir)
+    utils.create_dir(index_dir)
+    
+    
+    # Parse Pubmed (BioASQ) dataset
+    
+    bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size) # time consuming
+
+    
+
+#     # Generate query files
+    
+    
+    ir_toolkit_location = '../../../indri/'
+    trec_eval_command = '../../eval/trec_eval'
+    parameter_file_location = workdir + 'bioasq_index_param_file'
+    
+ 
+    index_data = Index(ir_toolkit_location, parameter_file_location)
+    index_data.build() # time consuming
+
+    
+#     # Generate qrels and qret
+    
+    queries_file = '../../bioasq_data/bioasq.test.json'
+
+    prefix = queries_file.split('/')[-1].strip('.json')
+    filename_prefix = workdir + prefix
+    
+#     print(filename_prefix)
+    
+    trec_query_file = filename_prefix + '_trec_query'
+    qrels_file = filename_prefix + '_qrels'
+    
+    bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
+    
+#     # Run query
+    
+
+    run_filename = workdir + 'run_' + prefix
+    query_parameter_file = workdir + dataset + '_query_params'
+    
+
+    bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename)
+    bm25_query.run() # fast
+    
+    # BIOASQ: Filter docus by year
+    doc_years_dict = get_doc_year(to_index_dir)
+    run_filename_filtered = run_filename + '_filtered'
+    filter_year(run_filename, run_filename_filtered, doc_years_dict)
+#     # Eval
+    eval(trec_eval_command, qrels_file, run_filename_filtered)    
 
