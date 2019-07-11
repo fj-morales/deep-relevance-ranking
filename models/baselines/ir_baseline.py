@@ -14,7 +14,7 @@ import subprocess
 # import re 
 # import csv
 # import torch
-# import sys
+import sys
 # import shutil
 # import random
 
@@ -203,13 +203,22 @@ def filter_year(run_filename, run_filename_filtered, doc_years_dict):
 
 if __name__ == "__main__":
     
+    
 # #     ir_toolkit_location = sys.argv[1] # '../indri/'
 # #     parameter_file_location = sys.argv[2] # './bioasq_index_param_file'
 
 #     # create dataset files dir
     
-    dataset = 'bioasq'
+    
+    
+    dataset = sys.argv[1] # 'bioasq'
     workdir = './' + dataset + '_dir/'
+    split = sys.argv[2] # 'test'
+    
+    try:
+        build_index_flag = sys.argv[3] # True
+    except:
+        build_index_flag = False
     
 #     # generate corpus files to index
     
@@ -223,31 +232,30 @@ if __name__ == "__main__":
     
     to_index_dir =  workdir + dataset + '_corpus/'
     index_dir = workdir + dataset + '_indri_index'
-    utils.create_dir(to_index_dir)
-    utils.create_dir(index_dir)
-    
-    
-    # Parse Pubmed (BioASQ) dataset
-    
-    bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size) # time consuming
 
-    
-
-#     # Generate query files
-    
-    
     ir_toolkit_location = '../../../indri/'
     trec_eval_command = '../../eval/trec_eval'
     parameter_file_location = workdir + 'bioasq_index_param_file'
+
     
- 
-    index_data = Index(ir_toolkit_location, parameter_file_location)
-    index_data.build() # time consuming
+#     # Generate query files
+    
+    if build_index_flag == True: 
+        
+        
+        utils.create_dir(to_index_dir)
+        utils.create_dir(index_dir)
+
+        # Parse Pubmed (BioASQ) dataset
+        bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size) # time consuming
+
+        index_data = Index(ir_toolkit_location, parameter_file_location)
+        index_data.build() # time consuming
 
     
 #     # Generate qrels and qret
     
-    queries_file = '../../bioasq_data/bioasq.test.json'
+    queries_file = '../../bioasq_data/bioasq.' + split + '.json'
 
     prefix = queries_file.split('/')[-1].strip('.json')
     filename_prefix = workdir + prefix
