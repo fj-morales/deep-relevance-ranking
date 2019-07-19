@@ -50,7 +50,7 @@ class Index:
 #         utils.create_dir(self.index_location)
     #     index_loc_param = '--indexPath=' + index_loc
         stopwords_file = './stopwords'
-        build_index_command = self.ir_toolkit_location + 'bin/IndriBuildIndex'
+        build_index_command = self.ir_toolkit_location + 'buildindex/IndriBuildIndex'
         toolkit_parameters = [
                                 build_index_command,
                                 self.parameter_file_location,
@@ -83,7 +83,7 @@ class Query:
 #         utils.create_dir(self.index_location)
     
         stopwords_file = './stopwords'
-        query_command = self.ir_toolkit_location + 'bin/IndriRunQuery'
+        query_command = self.ir_toolkit_location + 'runquery/IndriRunQuery'
         toolkit_parameters = [
                                 query_command,
                                 self.query_file,
@@ -103,6 +103,45 @@ class Query:
 
 # In[ ]:
 
+
+def generate_features_params(params, feat_param_file):
+    with open(params[0], 'rt') as q_trec_f:
+        trec_lines = q_trec_f.readlines()
+    
+    with open(feat_param_file, 'wt') as f_out:
+        for line in trec_lines[:-1]:
+            f_out.write(line)
+        f_out.write('<index>' + params[1] + '</index>\n')    
+        f_out.write('<outFile>' + params[2] + '</outFile>\n')    
+        f_out.write('<rankedDocsFile>' + params[3] + '</rankedDocsFile>\n')    
+        f_out.write('<qrelsFile>' + params[4] + '</qrelsFile>\n')    
+        f_out.write('<stemmer>' + params[5] + '</stemmer>\n') # This should not be here!, Fix GenerateExtraFeatures.cpp to read from index manifest
+        f_out.write('</parameters>\n')    
+         
+        
+class GenerateExtraFeatures:
+    def __init__(self, ir_toolkit_location, feat_param_file):
+        self.ir_toolkit_location = ir_toolkit_location
+        self.feat_param_file = feat_param_file
+        self.log_file = feat_param_file + '_run.log'
+        
+#     def build(self, ir_tool_params):
+    def run(self):
+        
+        features_command = self.ir_toolkit_location + 'L2R-features/GenerateExtraFeatures'
+        toolkit_parameters = [
+                                features_command,
+                                self.feat_param_file]
+        print(toolkit_parameters)
+        with open(self.log_file, 'wt') as rf:
+            proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=rf, stderr=subprocess.STDOUT, shell=False)
+#             proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+            
+            (out, err)= proc.communicate()
+            print(err)
+        print('Features file generated. Log: ', self.feat_param_file)
+            
+        
 
 def eval(trec_eval_command, qrel, qret):
     
@@ -233,7 +272,7 @@ if __name__ == "__main__":
     to_index_dir =  workdir + dataset + '_corpus/'
     index_dir = workdir + dataset + '_indri_index'
 
-    ir_toolkit_location = '../../../indri/'
+    ir_toolkit_location = '../../../indri-l2r/'
     trec_eval_command = '../../eval/trec_eval'
     parameter_file_location = workdir + 'bioasq_index_param_file'
 
@@ -267,7 +306,7 @@ if __name__ == "__main__":
     
     bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
     
-#     # Run query
+     # Run query
     
 
     run_filename = workdir + 'run_' + prefix
@@ -277,10 +316,31 @@ if __name__ == "__main__":
     bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename)
     bm25_query.run() # fast
     
+    
     # BIOASQ: Filter docus by year
     doc_years_dict = get_doc_year(to_index_dir)
     run_filename_filtered = run_filename + '_filtered'
     filter_year(run_filename, run_filename_filtered, doc_years_dict)
 #     # Eval
     eval(trec_eval_command, qrels_file, run_filename_filtered)    
+    
+    
+    # Generate features params file
+    
+    gen_features_param_file = filename_prefix + '_gen_features_params'
+    out_features_file = filename_prefix + '_features'
+    features_params =[
+        trec_query_file,
+        index_dir,
+        out_features_file,
+        run_filename_filtered,
+        qrels_file,
+        'krovetz', # This should not be here!, Fix GenerateExtraFeatures.cpp to read from index manifest
+    ]
+    generate_features_params(features_params, gen_features_param_file)
 
+
+    # Generate L2R features 
+    
+    feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
+    feature_generator.run()
