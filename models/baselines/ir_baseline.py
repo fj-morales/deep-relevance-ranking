@@ -252,7 +252,7 @@ if __name__ == "__main__":
     
     dataset = sys.argv[1] # 'bioasq'
     workdir = './' + dataset + '_dir/'
-    split = sys.argv[2] # 'test'
+    data_split = sys.argv[2] # 'test'
     
     try:
         build_index_flag = sys.argv[3] # True
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     
 #     # Generate qrels and qret
     
-    queries_file = '../../bioasq_data/bioasq.' + split + '.json'
+    queries_file = '../../bioasq_data/bioasq.' + data_split + '.json'
 
     prefix = queries_file.split('/')[-1].strip('.json')
     filename_prefix = workdir + prefix
