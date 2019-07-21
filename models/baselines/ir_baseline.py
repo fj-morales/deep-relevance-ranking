@@ -309,7 +309,7 @@ if __name__ == "__main__":
      # Run query
     
 
-    run_filename = workdir + 'run_' + prefix
+    run_filename = workdir + 'run_bm25_' + prefix
     query_parameter_file = workdir + dataset + '_query_params'
     
 
