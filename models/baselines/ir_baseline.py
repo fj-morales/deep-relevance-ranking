@@ -164,7 +164,8 @@ def eval(trec_eval_command, qrel, qret):
     print(out.decode("utf-8"))
     print('Run error: ', err)
     if err == None:
-        return 'Ok'
+        print('No errors')
+    return out.decode("utf-8")
 
 
 # In[ ]:
