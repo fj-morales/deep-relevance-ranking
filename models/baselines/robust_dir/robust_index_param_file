@@ -1,0 +1,17 @@
+<parameters>
+     <memory>20g</memory>
+     <threads>
+     20
+     </threads>
+     <index>./robust_dir/robust_indri_index</index>
+     <stemmer>    
+       <name>krovetz</name>
+     </stemmer>
+     <corpus>
+       <path>./robust_dir/robust_corpus</path>        
+       <class>trectext</class>
+     </corpus>
+     <field><name>TEXT</name></field>
+     <field><name>H3</name></field>
+     <field><name>HEADLINE</name></field>
+</parameters>
