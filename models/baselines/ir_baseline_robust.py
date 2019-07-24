@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[1]:
+
+
+# %load ir_baseline.py
+#!/usr/bin/env python
+
 # In[ ]:
 
 
@@ -17,7 +23,7 @@ import subprocess
 import sys
 # import shutil
 # import random
-
+import argparse
 # import argparse
 
 # import uuid
@@ -32,12 +38,37 @@ import sys
 ## My libraries
 
 import utils
-import bioasq_corpus_parser
-import bioasq_query_parser
-# from utils import *
+# import bioasq_corpus_parser
+import query_parser
+from join_split_files import join_files
 
 
 # In[ ]:
+
+
+def load_queries(queries_file):
+    with open(queries_file, 'rb') as input_file:
+        query_data = json.load(input_file)
+        return query_data['questions']
+
+# Functions
+
+def features_dict(features_file):
+    with open(features_file, 'rt') as f_file:
+        feat_dict = {}
+        for line in f_file:
+            qid = line.split(' ')[1].split(':')[1]
+            if qid in feat_dict.keys():
+                feat_dict[qid].append(line)
+            else:
+                feat_dict[qid] = [line]
+    return feat_dict
+
+def save_features(all_features_dict,qids_list, features_split_file):
+    with open(features_split_file, 'wt') as out_f:
+        for qid in qids_list:
+            to_write = all_features_dict[qid]
+            out_f.write("".join(to_write))
 
 
 class Index:
@@ -96,6 +127,7 @@ class Query:
             proc2 = subprocess.Popen(['grep', '^.*[ ]Q0[ ]'],stdin=proc.stdout, stdout=rf, stderr=subprocess.STDOUT, shell=False)
             (out, err)= proc2.communicate()
 
+#             print(out.decode('utf-8'))
 #             print('Run error: ', err)
             if err == None:
                 pass
@@ -139,8 +171,9 @@ class GenerateExtraFeatures:
 #             proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
             
             (out, err)= proc.communicate()
+#             print(out.decode('utf-8'))
             print(err)
-        print('Features file generated. Log: ', self.feat_param_file)
+        print('Features file generated. Log: ', self.log_file)
             
         
 
@@ -173,92 +206,50 @@ def eval(trec_eval_command, qrel, qret):
 # In[ ]:
 
 
-# Specific for BioASQ
-# for BioASQ only
 
-def get_doc_year(corpus_dir):
-    doc_year_files = [os.path.join('./',root, name)
-             for root, dirs, files in os.walk(corpus_dir)
-             for name in files
-             if all(y in name for y in ['year'])]
-#     print(doc_year_files)
-    
-    doc_years_dict = {}
-    for doc_year in doc_year_files:
-        with open(doc_year, 'rt') as dy_f:
-            dy_dict = json.load(dy_f)
-            doc_years_dict.update(dy_dict)
-    return doc_years_dict
-
-
-# In[ ]:
-
-
-# Specific for BioASQ
-# for BioASQ only
-
-def filter_year(run_filename, run_filename_filtered, doc_years_dict):
-    if 'train' in run_filename:
-        filter_year = 2015
-    else:
-        filter_year = 2016
-    with open(run_filename, 'rt') as rf:
-        run_dict = {}
-        doc_rank = 0
-        for line in rf:
-
-            elem = line.split(' ')
-            q_id = elem[0]
-            doc = elem[2]
-            
-            doc_score = elem[4]
-            doc_year = doc_years_dict[doc]            
-            if int(doc_year) <= filter_year:
-                if q_id in run_dict:
-                    doc_rank += 1
-                    if doc_rank == 100:
-                        pass
-#                         print('orig: ', elem[3])                        
-                    if doc_rank > 100:
-                        continue
-                    docu = [q_id, doc, doc_rank, doc_score, doc_year]
-                    run_dict[q_id].append(docu)
-                else:
-                    if doc_rank < 100:
-                        try: 
-#                             print('previous: ',  docu)
-                            pass
-                        except: 
-                            pass
-                    doc_rank = 1
-                    docu = [q_id, doc, doc_rank, doc_score, doc_year]
-                    run_dict[q_id] = [docu]
-
-        with open(run_filename_filtered, 'wt') as filter_f:
-            for key, value in run_dict.items():
-                for val in value:
-                    filter_f.write(val[0] + ' Q0 ' + val[1] + ' ' + str(val[2]) + ' ' + str(val[3]) + ' indri\n')
-
-
-# In[ ]:
-
+class fakeParser:
+    def __init__(self):
+        self.dataset = 'robust' 
+        self.data_split = 'test'
+#         self.data_split = 'train'
+#         self.data_split = 'dev'
+        self.build_index = False
+        self.fold = '1'
+        self.gen_features_flag = False
+        
 
 if __name__ == "__main__":
     
     
 # #     ir_toolkit_location = sys.argv[1] # '../indri/'
-# #     parameter_file_location = sys.argv[2] # './bioasq_index_param_file'
 
 #     # create dataset files dir
     
+    parser = argparse.ArgumentParser(description='Example 1 - sequential and local execution.')
+    parser.add_argument('--dataset',   type=str, help='')
+    parser.add_argument('--data_split',   type=str, help='')
+    parser.add_argument('--buildindex', action='store_true')
+    parser.add_argument('--fold', type=str,   help='')
+    parser.add_argument('--gen_features', action='store_true')
     
     
-    dataset = sys.argv[1] # 'bioasq'
+#     args=parser.parse_args()
+    args = fakeParser()
+    
+    
+    gen_features_flag = args.gen_features_flag
+    dataset = args.dataset # 
     workdir = './' + dataset + '_dir/'
-    data_split = sys.argv[2] # 'test'
+    data_split =  args.data_split# 'test'
+    fold = args.fold
+    
+    fold_dir = workdir + 's' + fold + '/'
+    
+    if not os.path.exists(fold_dir):
+        os.makedirs(fold_dir)
     
     try:
-        build_index_flag = sys.argv[3] # True
+        build_index_flag = args.build_index # True
     except:
         build_index_flag = False
     
@@ -269,7 +260,7 @@ if __name__ == "__main__":
     
 #     # Options
 #     data_dir = '/ssd/francisco/pubmed19-test/'
-    data_dir = '/ssd/francisco/pubmed19/'
+    data_dir = '/ssd/francisco/deep-relevance-ranking/robust04_data/collection/'
     
     
     to_index_dir =  workdir + dataset + '_corpus/'
@@ -277,19 +268,14 @@ if __name__ == "__main__":
 
     ir_toolkit_location = '../../../indri-l2r/'
     trec_eval_command = '../../eval/trec_eval'
-    parameter_file_location = workdir + 'bioasq_index_param_file'
+    parameter_file_location = workdir + dataset + '_index_param_file'
 
-    
-#     # Generate query files
+    print(fold_dir)
+#     utils.create_dir(fold_dir)
     
     if build_index_flag == True: 
         
-        
-        utils.create_dir(to_index_dir)
         utils.create_dir(index_dir)
-
-        # Parse Pubmed (BioASQ) dataset
-        bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size) # time consuming
 
         index_data = Index(ir_toolkit_location, parameter_file_location)
         index_data.build() # time consuming
@@ -297,22 +283,28 @@ if __name__ == "__main__":
     
 #     # Generate qrels and qret
     
-    queries_file = '../../bioasq_data/bioasq.' + data_split + '.json'
+    queries_file = '../../robust04_data/split_' + fold + '/rob04.' +  data_split + '.s' + fold + '.json'
 
-    prefix = queries_file.split('/')[-1].strip('.json')
-    filename_prefix = workdir + prefix
+    print(queries_file)
     
-#     print(filename_prefix)
+    prefix = queries_file.split('/')[-1].strip('.json')
+    filename_prefix = fold_dir + prefix
+    
+    print(filename_prefix)
+    
+    
+
+    #     print(filename_prefix)
     
     trec_query_file = filename_prefix + '_trec_query'
     qrels_file = filename_prefix + '_qrels'
-    
-    bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
-    
-     # Run query
+    print(trec_query_file)
+    print(qrels_file)
+    query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
     
 
-    run_filename = workdir + 'run_bm25_' + prefix
+    # Run query
+    run_filename = fold_dir + 'run_bm25_' + prefix
     query_parameter_file = workdir + dataset + '_query_params'
     
 
@@ -320,30 +312,59 @@ if __name__ == "__main__":
     bm25_query.run() # fast
     
     
-    # BIOASQ: Filter docus by year
-    doc_years_dict = get_doc_year(to_index_dir)
-    run_filename_filtered = run_filename + '_filtered'
-    filter_year(run_filename, run_filename_filtered, doc_years_dict)
-#     # Eval
-    eval(trec_eval_command, qrels_file, run_filename_filtered)    
+
+    # Eval
+    eval(trec_eval_command, qrels_file, run_filename)    
     
     
-    # Generate features params file
+
+    # Generate feature param file for all queries
+    # Only generate if not existent!
     
-    gen_features_param_file = filename_prefix + '_gen_features_params'
-    out_features_file = filename_prefix + '_features'
-    features_params =[
-        trec_query_file,
-        index_dir,
-        out_features_file,
-        run_filename_filtered,
-        qrels_file,
-        'krovetz', # This should not be here!, Fix GenerateExtraFeatures.cpp to read from index manifest
-    ]
-    generate_features_params(features_params, gen_features_param_file)
+#     trec_query_all_file = workdir + 'rob04.trec_queries.json'
+#     qrels_all_file = workdir + 'rob04_qrels_all'
+#     run_filename_all = workdir + 'run_bm25_rob04.all'
+    
+    gen_features_param_file = workdir + 'rob04' + '_gen_features_params'
+    out_features_file = workdir + 'rob04' + '_features'
+    
+    if gen_features_flag:
+    
+        [all_dict_queries_file, run_filename_all, qrels_all_file, trec_query_all_file] = join_files()
 
 
-    # Generate L2R features 
-    
-    feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
-    feature_generator.run()
+        features_params =[
+            trec_query_all_file,
+            index_dir,
+            out_features_file,
+            run_filename_all,
+            qrels_all_file,
+            'krovetz', # This should not be here!, Fix GenerateExtraFeatures.cpp to read from index manifest
+        ]
+        print(features_params)
+        print(gen_features_param_file)
+
+        generate_features_params(features_params, gen_features_param_file)
+
+        # Generate L2R features 
+
+        feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
+
+        feature_generator.run()
+
+
+# In[2]:
+
+
+q_file = queries_file
+
+
+query_list = load_queries(queries_file)
+qid_list = [q['id'] for q in query_list] 
+
+feat_dic = features_dict(out_features_file)
+
+out_features_file = filename_prefix + '_features'
+
+save_features(feat_dic, qid_list, out_features_file)
+
