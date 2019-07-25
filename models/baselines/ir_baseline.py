@@ -33,7 +33,8 @@ import sys
 
 import utils
 import bioasq_corpus_parser
-import bioasq_query_parser
+# import bioasq_query_parser
+import query_parser
 # from utils import *
 
 
@@ -41,20 +42,22 @@ import bioasq_query_parser
 
 
 class Index:
-    def __init__(self, ir_toolkit_location, parameter_file_location):
+    def __init__(self, ir_toolkit_location, index_dir, parameter_file_location, stopwords_file):
         self.ir_toolkit_location = ir_toolkit_location
         self.parameter_file_location = parameter_file_location
+        self.index_dir = index_dir
+        self.stopwords_file = stopwords_file
 #     def build(self, ir_tool_params):
     def build(self):
         
 #         utils.create_dir(self.index_location)
     #     index_loc_param = '--indexPath=' + index_loc
-        stopwords_file = './stopwords'
+        utils.create_dir(self.index_dir)
         build_index_command = self.ir_toolkit_location + 'buildindex/IndriBuildIndex'
         toolkit_parameters = [
                                 build_index_command,
                                 self.parameter_file_location,
-                                stopwords_file
+                                self.stopwords_file
                                 ]
 
         print(toolkit_parameters)
@@ -71,24 +74,24 @@ class Index:
 
 
 class Query:
-    def __init__(self, ir_toolkit_location, query_file, query_parameter_file, run_filename):
+    def __init__(self, ir_toolkit_location, query_file, query_parameter_file, run_filename, stopwords_file):
         self.ir_toolkit_location = ir_toolkit_location
         self.query_file = query_file
         self.query_parameter_file = query_parameter_file
         self.run_filename = run_filename
+        self.stopwords_file = stopwords_file
         
 #     def build(self, ir_tool_params):
     def run(self):
         
 #         utils.create_dir(self.index_location)
     
-        stopwords_file = './stopwords'
         query_command = self.ir_toolkit_location + 'runquery/IndriRunQuery'
         toolkit_parameters = [
                                 query_command,
                                 self.query_file,
                                 self.query_parameter_file,
-                                stopwords_file]
+                                self.stopwords_file]
         print(toolkit_parameters)
         with open(self.run_filename, 'wt') as rf:
 #             proc = subprocess.Popen(toolkit_parameters,stdin=subprocess.PIPE, stdout=rf, stderr=subprocess.STDOUT, shell=False)
@@ -256,7 +259,8 @@ if __name__ == "__main__":
     dataset = sys.argv[1] # 'bioasq'
     workdir = './' + dataset + '_dir/'
     data_split = sys.argv[2] # 'test'
-    
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
     try:
         build_index_flag = sys.argv[3] # True
     except:
@@ -278,20 +282,19 @@ if __name__ == "__main__":
     ir_toolkit_location = '../../../indri-l2r/'
     trec_eval_command = '../../eval/trec_eval'
     parameter_file_location = workdir + 'bioasq_index_param_file'
-
+    stopwords_file = workdir + 'stopwords'
     
 #     # Generate query files
     
-    if build_index_flag == True: 
+    if build_index_flag == 'True': 
         
         
-        utils.create_dir(to_index_dir)
-        utils.create_dir(index_dir)
 
         # Parse Pubmed (BioASQ) dataset
         bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size) # time consuming
 
-        index_data = Index(ir_toolkit_location, parameter_file_location)
+        index_data = Index(ir_toolkit_location, index_dir, parameter_file_location, stopwords_file)
+        print('Indexing')
         index_data.build() # time consuming
 
     
@@ -307,7 +310,8 @@ if __name__ == "__main__":
     trec_query_file = filename_prefix + '_trec_query'
     qrels_file = filename_prefix + '_qrels'
     
-    bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
+#     bioasq_query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
+    query_parser.query_parser(queries_file, trec_query_file, qrels_file) # fast
     
      # Run query
     
@@ -316,7 +320,7 @@ if __name__ == "__main__":
     query_parameter_file = workdir + dataset + '_query_params'
     
 
-    bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename)
+    bm25_query = Query(ir_toolkit_location, trec_query_file, query_parameter_file, run_filename, stopwords_file)
     bm25_query.run() # fast
     
     
@@ -325,8 +329,8 @@ if __name__ == "__main__":
     run_filename_filtered = run_filename + '_filtered'
     filter_year(run_filename, run_filename_filtered, doc_years_dict)
 #     # Eval
-    eval(trec_eval_command, qrels_file, run_filename_filtered)    
-    
+    results = eval(trec_eval_command, qrels_file, run_filename_filtered)    
+    print(results)
     
     # Generate features params file
     

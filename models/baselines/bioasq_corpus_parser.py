@@ -14,6 +14,7 @@ import json
 import subprocess
 
 import multiprocessing
+import utils
 import re 
 import sys
 # sys.path.append('qra_cod')
@@ -133,7 +134,7 @@ def start_process():
 
 def pubmed_xml_to_json(xml_file):
 
-#     print('Trec_docs... generated!')
+    print('Trec_docs... generated!')
     # Gen trec filename
     trec_file = trec_filename_gen(xml_file)
     doc_year_file = trec_file.rstrip('.txt') + '_year'
@@ -174,10 +175,9 @@ def corpus_parser(data_dir, to_index_dir, pool_size):
 #     data_dir = '/ssd/francisco/pubmed19/'
 #     to_index_dir = './bioasq_dir/bioasq_corpus/' # TODO Fix, pass to multiprocessing!
 
-    make_folder(to_index_dir)
-
+    utils.create_dir(to_index_dir)
+    
     pubmed_files = get_filenames(data_dir)
-	
 
     # assign to the multiprocessing pool 
     
