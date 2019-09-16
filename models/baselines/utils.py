@@ -40,7 +40,15 @@ clean = lambda t: re.sub('[,?;*!%^&_+():-\[\]{}]', ' ', t.replace('"', ' ').repl
 
 def remove_sc(text):
 
-    text = clean(text) # My method
+    text = re.sub(r'[^\w\s]',' ',text) # My method
+#     text = clean(text) # Their method
+
+    return text
+
+def remove_sc2(text):
+
+#     text = re.sub(r'[^\w\s]',' ',text) # My method
+    text = clean(text) # Their method
 
     return text
 

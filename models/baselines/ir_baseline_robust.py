@@ -213,9 +213,11 @@ class fakeParser:
         self.data_split = 'test'
 #         self.data_split = 'train'
 #         self.data_split = 'dev'
-        self.build_index = False
+#         self.build_index = True
+        self.build_index = None
         self.fold = '1'
-        self.gen_features_flag = False
+        self.gen_features = True
+#         self.gen_features = None
         
 
 if __name__ == "__main__":
@@ -228,7 +230,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Example 1 - sequential and local execution.')
     parser.add_argument('--dataset',   type=str, help='')
     parser.add_argument('--data_split',   type=str, help='')
-    parser.add_argument('--buildindex', action='store_true')
+    parser.add_argument('--build_index', action='store_true')
     parser.add_argument('--fold', type=str,   help='')
     parser.add_argument('--gen_features', action='store_true')
     
@@ -236,22 +238,15 @@ if __name__ == "__main__":
 #     args=parser.parse_args()
     args = fakeParser()
     
-    
-    gen_features_flag = args.gen_features_flag
-    dataset = args.dataset # 
+    dataset = args.dataset #robust
     workdir = './' + dataset + '_dir/'
     data_split =  args.data_split# 'test'
-    fold = args.fold
+    fold = args.fold # '1'
     
     fold_dir = workdir + 's' + fold + '/'
     
     if not os.path.exists(fold_dir):
         os.makedirs(fold_dir)
-    
-    try:
-        build_index_flag = args.build_index # True
-    except:
-        build_index_flag = False
     
 #     # generate corpus files to index
     
@@ -273,11 +268,13 @@ if __name__ == "__main__":
     print(fold_dir)
 #     utils.create_dir(fold_dir)
     
-    if build_index_flag == True: 
+    if args.build_index: 
+        
         
         utils.create_dir(index_dir)
 
         index_data = Index(ir_toolkit_location, parameter_file_location)
+        print('Build index')
         index_data.build() # time consuming
 
     
@@ -314,8 +311,8 @@ if __name__ == "__main__":
     
 
     # Eval
-    eval(trec_eval_command, qrels_file, run_filename)    
-    
+    results = eval(trec_eval_command, qrels_file, run_filename)    
+    print(results)
     
 
     # Generate feature param file for all queries
@@ -328,7 +325,7 @@ if __name__ == "__main__":
     gen_features_param_file = workdir + 'rob04' + '_gen_features_params'
     out_features_file = workdir + 'rob04' + '_features'
     
-    if gen_features_flag:
+    if args.gen_features:
     
         [all_dict_queries_file, run_filename_all, qrels_all_file, trec_query_all_file] = join_files()
 
@@ -353,18 +350,18 @@ if __name__ == "__main__":
         feature_generator.run()
 
 
-# In[2]:
+    # In[2]:
 
 
-q_file = queries_file
+    q_file = queries_file
 
 
-query_list = load_queries(queries_file)
-qid_list = [q['id'] for q in query_list] 
+    query_list = load_queries(queries_file)
+    qid_list = [q['id'] for q in query_list] 
 
-feat_dic = features_dict(out_features_file)
+    feat_dic = features_dict(out_features_file)
 
-out_features_file = filename_prefix + '_features'
+    out_features_file = filename_prefix + '_features'
 
-save_features(feat_dic, qid_list, out_features_file)
+    save_features(feat_dic, qid_list, out_features_file)
 

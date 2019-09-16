@@ -25,12 +25,14 @@ import sys
 # import time
 
 # import bz2
+import argparse
 # import pandas as pd
 # # import dbmanager  as dbmanager
 # from os.path import join
 
 ## My libraries
 
+import eval_utils
 import utils
 import bioasq_corpus_parser
 # import bioasq_query_parser
@@ -147,30 +149,30 @@ class GenerateExtraFeatures:
             
         
 
-def eval(trec_eval_command, qrel, qret):
+# def eval(trec_eval_command, qrel, qret):
     
-    metrics = '-m map -m P.20 -m ndcg_cut.20'
-    toolkit_parameters = [
-                            trec_eval_command,
-                            '-m',
-                            'map',
-                            '-m',
-                            'P.20',
-                            '-m',
-                            'ndcg_cut.20',
-                            qrel,
-                            qret]
+#     metrics = '-m map -m P.20 -m ndcg_cut.20'
+#     toolkit_parameters = [
+#                             trec_eval_command,
+#                             '-m',
+#                             'map',
+#                             '-m',
+#                             'P.20',
+#                             '-m',
+#                             'ndcg_cut.20',
+#                             qrel,
+#                             qret]
 
-#     print(toolkit_parameters)
+# #     print(toolkit_parameters)
 
-    proc = subprocess.Popen(toolkit_parameters, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
-    (out, err) = proc.communicate()
-#     print(out.decode("utf-8"))
-#    print('Run error: ', err)
-    if err == None:
-        pass
-#         print('No errors')
-    return out.decode("utf-8")
+#     proc = subprocess.Popen(toolkit_parameters, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+#     (out, err) = proc.communicate()
+# #     print(out.decode("utf-8"))
+# #    print('Run error: ', err)
+#     if err == None:
+#         pass
+# #         print('No errors')
+#     return out.decode("utf-8")
 
 
 # In[ ]:
@@ -243,28 +245,43 @@ def filter_year(run_filename, run_filename_filtered, doc_years_dict):
                     filter_f.write(val[0] + ' Q0 ' + val[1] + ' ' + str(val[2]) + ' ' + str(val[3]) + ' indri\n')
 
 
-# In[ ]:
-
+class fakeParser:
+    def __init__(self):
+        self.dataset = 'bioasq' 
+        self.data_split = 'test'
+#         self.data_split = 'train'
+#         self.data_split = 'dev'
+#         self.build_index = True
+        self.build_index = None
+        self.fold = '1'
+        self.gen_features = True
+#         self.gen_features = None
+        
 
 if __name__ == "__main__":
     
     
 # #     ir_toolkit_location = sys.argv[1] # '../indri/'
-# #     parameter_file_location = sys.argv[2] # './bioasq_index_param_file'
 
 #     # create dataset files dir
     
+    parser = argparse.ArgumentParser(description='Example 1 - sequential and local execution.')
+    parser.add_argument('--dataset',   type=str, help='')
+    parser.add_argument('--data_split',   type=str, help='')
+    parser.add_argument('--build_index', action='store_true')
+    parser.add_argument('--fold', type=str,   help='')
+    parser.add_argument('--gen_features', action='store_true')
     
     
-    dataset = sys.argv[1] # 'bioasq'
+#     args=parser.parse_args()
+    args = fakeParser()
+    
+    dataset = args.dataset
     workdir = './' + dataset + '_dir/'
-    data_split = sys.argv[2] # 'test'
+    data_split = args.data_split
     if not os.path.exists(workdir):
         os.makedirs(workdir)
-    try:
-        build_index_flag = sys.argv[3] # True
-    except:
-        build_index_flag = False
+
     
 #     # generate corpus files to index
     
@@ -286,10 +303,7 @@ if __name__ == "__main__":
     
 #     # Generate query files
     
-    if build_index_flag == 'True': 
-        
-        
-
+    if args.build_index: 
         # Parse Pubmed (BioASQ) dataset
         bioasq_corpus_parser.corpus_parser(data_dir, to_index_dir, pool_size) # time consuming
 
@@ -349,5 +363,6 @@ if __name__ == "__main__":
 
     # Generate L2R features 
     
-    feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
-    feature_generator.run()
+    if args.gen_features: 
+        feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
+        feature_generator.run()
