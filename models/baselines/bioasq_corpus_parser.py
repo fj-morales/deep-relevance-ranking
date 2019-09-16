@@ -183,7 +183,7 @@ def corpus_parser(data_dir, to_index_dir, pool_size):
     
     
     pool = multiprocessing.Pool(processes=pool_size,
-                            initializer=start_process,
+                            initializer=start_process
                             )
 
 #     pool_outputs = pool.map(baseline_computing, params)
