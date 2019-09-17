@@ -19,15 +19,13 @@ import shutil
 
 # my modules
 import utils
+from utils import load_queries
 
 
 # In[32]:
 
 
-def load_queries(queries_file):
-    with open(queries_file, 'rb') as input_file:
-        query_data = json.load(input_file)
-        return query_data['questions']
+
 
 
 # In[33]:

@@ -38,18 +38,13 @@ import argparse
 ## My libraries
 
 import utils
+from utils import load_queries
 # import bioasq_corpus_parser
 import query_parser
 from join_split_files import join_files
 
 
 # In[ ]:
-
-
-def load_queries(queries_file):
-    with open(queries_file, 'rb') as input_file:
-        query_data = json.load(input_file)
-        return query_data['questions']
 
 # Functions
 
@@ -361,7 +356,7 @@ if __name__ == "__main__":
 
     feat_dic = features_dict(out_features_file)
 
-    out_features_file = filename_prefix + '_features'
+    out_features_split_file = filename_prefix + '_features'
 
-    save_features(feat_dic, qid_list, out_features_file)
+    save_features(feat_dic, qid_list, out_features_split_file)
 

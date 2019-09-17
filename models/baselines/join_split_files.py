@@ -12,6 +12,7 @@
 
 import json
 import os
+from utils import load_queries
 
 def get_filenames(data_dir, word_filter):
     filenames = [os.path.join(root, name)
@@ -22,11 +23,6 @@ def get_filenames(data_dir, word_filter):
              if (word_filter in name)
            ]
     return filenames
-
-def load_queries(queries_file):
-    with open(queries_file, 'rb') as input_file:
-        query_data = json.load(input_file)
-        return query_data['questions']
 
 def join_files():
 
