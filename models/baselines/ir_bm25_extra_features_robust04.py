@@ -21,7 +21,7 @@ from itertools import groupby
 
 
 # REMOVE!!
-from ir_baseline import *
+from eval_utils import *
 
 
 # In[3]:
@@ -54,8 +54,6 @@ def train_linear_model(train_features_file):
     # Slice info for L2R Linear Model (Deep Relevance Ranking paper)
     # 4 extra features
     extra_features = features[:,-4:]
-    
-    
     # Fitting linear model
     # Ordinary Least Squares Linear Regression 
     linearModel = LinearRegression()
@@ -133,8 +131,6 @@ if __name__ == "__main__":
     # train model
     linear_model = train_linear_model(train_features_file)
     
-
-
 # In[9]:
 
 
@@ -161,7 +157,7 @@ eval(trec_eval_command, qrels_file, run_linear_model_file)
 
 
 trec_eval_command = '../../eval/trec_eval'
-qrels_file = fold_dir + 'rob04.test.' + fold + '_qrels'
+
 run_bm25_file = fold_dir + 'run_bm25_rob04.test.' + fold 
 eval(trec_eval_command, qrels_file, run_bm25_file)
 

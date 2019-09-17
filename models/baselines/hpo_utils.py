@@ -1,4 +1,5 @@
-
+import random
+import itertools
 
 # Random grid search sampling
 
@@ -18,6 +19,10 @@ def get_random_params(hyper_params, num_iter):
             print('repeated')
     return random_h_params_list
 
+
+def get_grid_search_params(hyper_params):
+    grid_search_h_params_list = list(itertools.product(*hyper_params))
+    return grid_search_h_params_list
 
 def find_best_dev_model(best_model_params_file, random_iterations = 5000):
 #     random_search = 'yes'

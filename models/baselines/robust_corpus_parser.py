@@ -11,6 +11,7 @@ import os
 # import bioasq_corpus_parser
 import utils
 import multiprocessing
+from functools import partial
 
 
 # In[2]:
@@ -29,22 +30,22 @@ def get_filenames(data_dir):
 
 
 def start_process():
-    pass
-#     print( 'Starting', multiprocessing.current_process().name)
+#     pass
+    print( 'Starting', multiprocessing.current_process().name)
 
 
 # In[4]:
 
 
-def process_file(file):
+def process_file(to_index_dir,file):
     
     filename = file.split('/')[-1:][0]
-    
+#     print(filename)
+    print(to_index_dir)
     outdir = to_index_dir + '/'.join(file.split('/')[-2:-1]) + '/'
-#     print(outdir)
     
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+    
+    utils.create_dir(outdir)
     
     file_out = outdir + filename
     
@@ -79,42 +80,43 @@ def process_file(file):
                 out_f.write(line)
                 print('Saved :', file_out)    
     except:
-        print('error processing file :', file)    
+        print('error processing file :', file)  
 
 
 # In[5]:
 
 
-def corpus_parser(data_dir, to_index_dir, pool_size):
-    pass
+# def corpus_parser(data_dir, to_index_dir, pool_size):
+#     pass
 
 
 # In[7]:
 
 
-if __name__ == "__main__":
+def corpus_parser(data_dir, to_index_dir, pool_size):
     
-    data_dir = '/ssd2/francisco/robust_corpus/'
+#     data_dir = '/ssd2/francisco/robust_corpus/'
     
     
-    to_index_dir = './robust_dir/robust_corpus/'
+#     to_index_dir = './robust_dir/robust_corpus/'
     
-    pool_size = 10
+#     pool_size = 10
+    
+    utils.create_dir(to_index_dir)
     
     corpus_files = get_filenames(data_dir)
-    
+    print(len(corpus_files))
 #     corpus_files = corpus_files[0:10]
     
-    print(len(corpus_files))
-    
     pool = multiprocessing.Pool(processes=pool_size,
-                            initializer=start_process,
+                            initializer=start_process
                             )
 
 #     pool_outputs = pool.map(baseline_computing, params)
 
+    process_file_partial = partial(process_file, to_index_dir)
 
-    pool.map_async(process_file, corpus_files)
+    pool.map_async(process_file_partial, corpus_files)
 
     pool.close() # no more tasks
 

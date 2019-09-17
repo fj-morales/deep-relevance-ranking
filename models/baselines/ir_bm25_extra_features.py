@@ -18,9 +18,11 @@ from sklearn.linear_model import LinearRegression
 # from math import sin
 import numpy as np
 from itertools import groupby
+import argparse
 
 
 # REMOVE!!
+from utils import *
 from eval_utils import *
 
 
@@ -54,6 +56,7 @@ def train_linear_model(train_features_file):
     [rels, qids, features, docids] = load_features(train_features_file)
     
     # Slice info for L2R Linear Model (Deep Relevance Ranking paper)
+    # 4 extra features
     extra_features = features[:,-4:]
     # Fitting linear model
     # Ordinary Least Squares Linear Regression 
@@ -100,63 +103,95 @@ def write_predictions_run_file(predictions_dict, filename):
             [f_out.write(x[0] + ' Q0 ' +  x[1] + ' ' + str(x[3]) + ' ' + str(x[2])[0:7] + ' linearModel\n') for x in value]
 
 
-# In[7]:
-
-
-# Classes
-
-
-# In[8]:
+class fakeParser:
+    def __init__(self):
+        self.dataset = 'bioasq' 
+#         self.build_index = True
+        self.build_index = None
+        self.data_spli = 'all'
+        self.fold = '1'
+        self.gen_features = True
+#         self.gen_features = None
+            
 
 
 # Main
 if __name__ == "__main__":
 ## System inputs, main variable options
 
-#     dataset = sys.argv[1] # 'bioasq'
-#     workdir = './' + dataset + '_dir/'
-#     data_split = sys.argv[2] # 'test'
-
-#     features_file = './bioasq_dir/bioasq.dev_features'
-    train_features_file = './bioasq_dir/bioasq.trai_features'
-    test_features_file = './bioasq_dir/bioasq.test_features'
+    parser = argparse.ArgumentParser(description='Example 1 - sequential and local execution.')
+    parser.add_argument('--dataset',   type=str, help='')
+    parser.add_argument('--data_split',   type=str, help='')
+    parser.add_argument('--fold', type=str,   help='')
     
-    # train model
-    linear_model = train_linear_model(train_features_file)
+    args=parser.parse_args()
+#     args = fakeParser()
+
+    dataset = args.dataset
+    workdir = './' + dataset + '_dir/'
+    create_dir(workdir)
     
+    
+    if (not args.fold or args.dataset == 'bioasq'):
+        args.fold = ['']
+    elif args.fold == 'all':
+        args.fold = ['1','2','3','4','5']
+    else:
+        args.fold = [args.fold]
+    
+    
+    for f in args.fold:
+        
+        fold = f # '1'
+        
+        if args.dataset == 'bioasq':
+            fold_dir = workdir
+        else:
+            fold_dir = workdir + 's' + fold + '/'
 
+    #     features_file = './bioasq_dir/bioasq.dev_features'
 
-# In[9]:
+        if args.dataset == 'bioasq':
+            train_features_file = './bioasq_dir/bioasq.trai_features'
+    #         val_features_file = './bioasq_dir/bioasq.dev_features'
+            test_features_file = './bioasq_dir/bioasq.test_features'
 
+            run_linear_model_file = workdir + 'run_' + dataset + '_linearModel.test_filtered'
+            qrels_file = workdir + dataset + '.test_qrels'
+            run_bm25_file = workdir + 'run_bm25_' + dataset + '.test_filtered'
 
-# predict
-ranked_dict = predict(test_features_file, linear_model)
+        elif args.dataset == 'robust':
+            train_features_file = fold_dir+ 'rob04.train.s' + fold + '_features'
+    #         val_features_file = fold_dir+ 'rob04.dev.s' + fold + '_features'
+            test_features_file = fold_dir + 'rob04.test.s' + fold + '_features'
+            run_linear_model_file = fold_dir + 'run_rob04_linearModel.test.s' + fold
+            qrels_file = fold_dir + 'rob04.test.s' + fold + '_qrels'
+            run_bm25_file = fold_dir + 'run_bm25_rob04.test.s' + fold
 
+        # train model
+        linear_model = train_linear_model(train_features_file)
 
-# In[10]:
+        # predict
+        ranked_dict = predict(test_features_file, linear_model)
 
+        # In[10]:
 
-run_linear_model_file = './bioasq_dir/run_bioasq_linearModel.test_filtered'
-write_predictions_run_file(ranked_dict, run_linear_model_file)
+        write_predictions_run_file(ranked_dict, run_linear_model_file)
 
+        # In[17]:
 
-# In[17]:
-
-
-trec_eval_command = '../../eval/trec_eval'
-qrels_file = './bioasq_dir/bioasq.test_qrels'
-linear_model_results = eval(trec_eval_command, qrels_file, run_linear_model_file)
-print('Linear model results: \n')
-linear_model_results
-
-
-# In[18]:
-
-
-trec_eval_command = '../../eval/trec_eval'
-qrels_file = './bioasq_dir/bioasq.test_qrels'
-run_bm25_file = './bioasq_dir/run_bm25_bioasq.test_filtered'
-bm25_results = eval(trec_eval_command, qrels_file, run_bm25_file)
-print('BM25 (default) results: \n')
-bm25_results
+        # BM25+Extra features linear model
+        trec_eval_command = '../../eval/trec_eval'
+        linear_model_results = eval(trec_eval_command, qrels_file, run_linear_model_file)
+        linear_model_results['model'] = 'bm25+extra'
+        linear_model_results['model_file'] = run_linear_model_file
+        print('Linear model results: \n', linear_model_results)
+        
+        # BM25 (default, vanilla)  model
+        trec_eval_command = '../../eval/trec_eval'
+        bm25_results = eval(trec_eval_command, qrels_file, run_bm25_file)
+        bm25_results['model'] = 'bm25+extra'
+        bm25_results['model_file'] = run_bm25_file
+        print('BM25 (default) results: \n', bm25_results)
+        
 
