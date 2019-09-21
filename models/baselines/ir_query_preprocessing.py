@@ -209,15 +209,17 @@ if __name__ == "__main__":
 
             
         for data_split in data_splits:
-
-            if args.dataset == 'robust':
-                queries_file = '../../robust04_data/split_' + fold + '/rob04.' +  data_split + '.s' + fold + '.json'
-            elif args.dataset == 'bioasq':
+                
+            if args.dataset == 'bioasq':
                 queries_file = '../../bioasq_data/bioasq.' + data_split + '.json'
+                prefix = dataset + '_' + data_split
+
+            elif args.dataset == 'robust':
+                queries_file = '../../robust04_data/split_' + fold + '/rob04.' +  data_split + '.s' + fold + '.json'
+                prefix = dataset + '_' + data_split + '_s' + fold 
 
 
-
-            prefix = queries_file.split('/')[-1].strip('.json')
+#             prefix = queries_file.split('/')[-1].strip('.json')
 #             filename_prefix = workdir + prefix
             filename_prefix = fold_dir + prefix
 

@@ -197,10 +197,11 @@ if __name__ == "__main__":
             data_splits = [args.data_split]
 
         for data_split in data_splits:
-        
+            
             if args.dataset == 'bioasq':
                 queries_file = '../../bioasq_data/bioasq.' + data_split + '.json'
-                prefix = queries_file.split('/')[-1].strip('.json')
+#                 prefix = queries_file.split('/')[-1].strip('.json')
+                prefix = dataset + '_' + data_split
                 filename_prefix = workdir + prefix
                 trec_query_file = filename_prefix + '_trec_query'
                 run_filename = workdir + 'run_bm25_' + prefix
@@ -226,8 +227,9 @@ if __name__ == "__main__":
 
             elif args.dataset == 'robust':
                 queries_file = '../../robust04_data/split_' + fold + '/rob04.' +  data_split + '.s' + fold + '.json'
-                q_file = queries_file
-                prefix = queries_file.split('/')[-1].strip('.json')
+#                 q_file = queries_file
+#                 prefix = queries_file.split('/')[-1].strip('.json')
+                prefix = dataset + '_' + data_split + '_s' + fold 
                 filename_prefix = fold_dir + prefix
 
                 query_list = load_queries(queries_file)

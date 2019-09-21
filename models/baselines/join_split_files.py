@@ -40,13 +40,13 @@ def join_files():
     all_queries_dict = {'questions': all_queries}
 
     workdir = './robust_dir/'
-    all_queries_dict_file = workdir + 'rob04.all_queries.json'
+    all_queries_dict_file = workdir + 'robust_all_queries.json'
 
     with open(all_queries_dict_file,  'wt') as out_f:
         json.dump(all_queries_dict, out_f, indent = 4)
 
     run_dir = './robust_dir/s1/'
-    run_filter = 'run_bm25_rob04'
+    run_filter = 'run_bm25_robust'
     run_list = get_filenames(run_dir, run_filter)
     len(run_list)
 #     print(run_list)
@@ -58,7 +58,7 @@ def join_files():
         all_runs = all_runs + run_lines
     len(all_runs)
 
-    all_run_file = workdir + 'run_bm25_rob04.all'
+    all_run_file = workdir + 'run_bm25_robust_all'
     with open(all_run_file,  'wt') as out_f:
         out_f.write("".join(all_runs))
 
@@ -76,7 +76,7 @@ def join_files():
         all_qrels = all_qrels + qrel_lines
     len(all_qrels)
 
-    all_qrels_file = workdir + 'rob04_qrels_all'
+    all_qrels_file = workdir + 'robust_qrels_all'
     with open(all_qrels_file,  'wt') as out_f:
         out_f.write("".join(all_qrels))
         
@@ -95,7 +95,7 @@ def join_files():
         all_trec_query = all_trec_query + trec_lines[1:-1]
         
         
-    all_trec_query_file = workdir + 'rob04_all_trec_query'
+    all_trec_query_file = workdir + 'robust_all_trec_query'
     with open(all_trec_query_file,  'wt') as out_f:
         out_f.write('<parameters>\n')
         out_f.write("".join(all_trec_query))

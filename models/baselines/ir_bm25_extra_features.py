@@ -156,17 +156,17 @@ if __name__ == "__main__":
     #         val_features_file = './bioasq_dir/bioasq.dev_features'
             test_features_file = './bioasq_dir/bioasq.test_features'
 
-            run_linear_model_file = workdir + 'run_' + dataset + '_linearModel.test_filtered'
+            run_linear_model_file = workdir + 'run_' + dataset + '_linearModel_test_filtered'
             qrels_file = workdir + dataset + '.test_qrels'
-            run_bm25_file = workdir + 'run_bm25_' + dataset + '.test_filtered'
+            run_bm25_file = workdir + 'run_bm25_' + dataset + '_test_filtered'
 
         elif args.dataset == 'robust':
-            train_features_file = fold_dir+ 'rob04.train.s' + fold + '_features'
-    #         val_features_file = fold_dir+ 'rob04.dev.s' + fold + '_features'
-            test_features_file = fold_dir + 'rob04.test.s' + fold + '_features'
-            run_linear_model_file = fold_dir + 'run_rob04_linearModel.test.s' + fold
-            qrels_file = fold_dir + 'rob04.test.s' + fold + '_qrels'
-            run_bm25_file = fold_dir + 'run_bm25_rob04.test.s' + fold
+            train_features_file = fold_dir+ 'robust_train_s' + fold + '_features'
+    #         val_features_file = fold_dir+ 'robust_dev_s' + fold + '_features'
+            test_features_file = fold_dir + 'robust_test_s' + fold + '_features'
+            run_linear_model_file = fold_dir + 'run_robust_linearModel_test_s' + fold
+            qrels_file = fold_dir + 'robust_test_s' + fold + '_qrels'
+            run_bm25_file = fold_dir + 'run_bm25_robust_test_s' + fold
 
         # train model
         linear_model = train_linear_model(train_features_file)
