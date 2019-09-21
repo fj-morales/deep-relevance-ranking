@@ -18,8 +18,6 @@ import argparse
 import eval_utils
 import utils
 import bioasq_corpus_parser
-import robust_corpus_parser
-# import bioasq_query_parser
 import query_parser
 # from utils import *
 
@@ -101,8 +99,12 @@ if __name__ == "__main__":
         
     
     
-    
-    to_index_dir =  workdir + dataset + '_corpus/'
+     
+    if args.dataset == 'bioasq':
+    	to_index_dir =  workdir + dataset + '_corpus/'
+    elif args.dataset == 'robust':
+    	to_index_dir =  '/ssd2/francisco/robust_corpus/'
+
     index_dir = workdir + dataset + '_indri_index'
 
     ir_toolkit_location = '../../../indri-l2r/'

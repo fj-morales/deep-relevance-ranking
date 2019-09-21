@@ -170,10 +170,9 @@ if __name__ == "__main__":
         
         generate_features_params(features_params, gen_features_param_file)
 
-        if os.path.isfile('out_features_file'):
-            # Generate L2R features 
-            feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
-            feature_generator.run()
+        # Generate L2R features 
+        feature_generator = GenerateExtraFeatures(ir_toolkit_location, gen_features_param_file)
+        feature_generator.run()
         
         # Get all features in a dict
         feat_dic = features_dict(out_features_file)
