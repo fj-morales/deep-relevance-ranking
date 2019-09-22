@@ -152,12 +152,12 @@ if __name__ == "__main__":
     #     features_file = './bioasq_dir/bioasq.dev_features'
 
         if args.dataset == 'bioasq':
-            train_features_file = './bioasq_dir/bioasq.trai_features'
-    #         val_features_file = './bioasq_dir/bioasq.dev_features'
-            test_features_file = './bioasq_dir/bioasq.test_features'
+            train_features_file = './bioasq_dir/bioasq_train_features'
+    #         val_features_file = './bioasq_dir/bioasq_dev_features'
+            test_features_file = './bioasq_dir/bioasq_test_features'
 
             run_linear_model_file = workdir + 'run_' + dataset + '_linearModel_test_filtered'
-            qrels_file = workdir + dataset + '.test_qrels'
+            qrels_file = workdir + dataset + '_test_qrels'
             run_bm25_file = workdir + 'run_bm25_' + dataset + '_test_filtered'
 
         elif args.dataset == 'robust':
