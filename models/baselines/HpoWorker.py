@@ -218,7 +218,7 @@ class HpoWorker(Worker):
                     qrels_val_file = fold_dir + self.dataset + '_dev' + '_qrels'
                 else:
                     fold_dir = self.workdir + 's' + fold + '/'
-                    dataset_fold = self.dataset + '_' + fold
+                    dataset_fold = self.dataset + '_s' + fold
                     train_queries_file = '../../robust04_data/split_' + fold + '/rob04.' +  'train' + '.s' + fold + '.json'
                     train_data_file = fold_dir + self.dataset + '_train' + '_s' + fold + '_features'
                     val_data_file = fold_dir + self.dataset + '_dev' + '_s' + fold +  '_features'
