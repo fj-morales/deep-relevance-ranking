@@ -114,9 +114,6 @@ class fakeParser:
         self.n_iterations = 1
         self.n_workers = 1
         self.hpo_method = 'rs'
-        self.port = 10000
-        
-        
 
 
 # In[8]:
@@ -134,7 +131,6 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget',   type=int, help='Maximum (percentage) budget used during the optimization.',    default=100)
     parser.add_argument('--n_iterations', type=int,   help='Number of iterations performed by the optimizer', default=500)
     parser.add_argument('--n_workers', type=int,   help='Number of workers to run in parallel.', default=5)
-    parser.add_argument('--port',   type=int,    default=10000)
     
     args=parser.parse_args()
 #     args = fakeParser()
@@ -195,6 +191,8 @@ if __name__ == "__main__":
     elif hpo_method == 'bohb':
         bohb = BOHB(  configspace = worker.get_configspace(),
                               run_id = hpo_run_id, 
+                              nameserver=ns_host,
+                              nameserver_port=ns_port,
                               min_budget = args.min_budget, max_budget = args.max_budget
                        )
         res = bohb.run(n_iterations = args.n_iterations, min_n_workers = args.n_workers)

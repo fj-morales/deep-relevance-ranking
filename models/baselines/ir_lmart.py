@@ -66,7 +66,7 @@ class L2Ranker:
         # Java(TM) SE Runtime Environment (build 1.8.0_211-b12)
         # Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)
         self.params = params
-        self.log_file = self.params[-1:][0] + '.log'
+        self.log_file = ''
         self.ranker_command = ['java', '-jar', ranklib_location + 'RankLib-2.12.jar']
         self.normalization = normalization
         self.save_model_file = ''
@@ -74,6 +74,7 @@ class L2Ranker:
 #     def build(self, ir_tool_params):
     def train(self, train_data_file, save_model_file, config):
         self.save_model_file = save_model_file
+        self.log_file = save_model_file + '.log'
         toolkit_parameters = [
                                 *self.ranker_command, # * to unpack list elements
                                 '-train',
