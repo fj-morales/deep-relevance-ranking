@@ -14,7 +14,7 @@ def eval(trec_eval_command, qrel, qret):
                             qrel,
                             qret]
 
-#     print(toolkit_parameters)
+    print(toolkit_parameters)
 
     proc = subprocess.Popen(toolkit_parameters, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
     (out, err) = proc.communicate()
