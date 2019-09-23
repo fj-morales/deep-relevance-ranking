@@ -19,7 +19,7 @@ import shutil
 
 # my modules
 import utils
-from utils import load_queries
+from ir_utils import load_queries
 
 
 # In[32]:

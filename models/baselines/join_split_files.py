@@ -12,7 +12,7 @@
 
 import json
 import os
-from utils import load_queries
+from ir_utils import load_queries
 
 def get_filenames(data_dir, word_filter):
     filenames = [os.path.join(root, name)

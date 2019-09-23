@@ -39,7 +39,7 @@ import utils
 import bioasq_corpus_parser
 # import bioasq_query_parser
 import query_parser
-# from utils import *
+# from ir_utils import *
 
 
 

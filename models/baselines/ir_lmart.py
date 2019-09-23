@@ -47,7 +47,7 @@ def generate_run_file(pre_run_file, run_file):
     
     with open(pre_run_file, 'rt') as input_f:
         pre_run = input_f.readlines()
-        print('Aqui veo si genero o no el run file: ',type(pre_run))
+#         print('Aqui veo si genero o no el run file: ',type(pre_run))
     with open(run_file, 'wt') as out_f:
         for line in pre_run:
             out_f.write(line.replace('docid=','').replace('indri', 'lambdaMART'))

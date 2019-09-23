@@ -33,7 +33,7 @@ from eval_utils import *
 # HPO
 from hpo_utils import *
 
-from utils import *
+from ir_utils import *
 
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH

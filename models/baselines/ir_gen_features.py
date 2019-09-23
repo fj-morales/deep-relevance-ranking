@@ -36,11 +36,11 @@ import argparse
 
 import eval_utils
 import utils
-from utils import load_queries
+from ir_utils import load_queries
 import bioasq_corpus_parser
 # import bioasq_query_parser
 import query_parser
-# from utils import *
+# from ir_utils import *
 from join_split_files import join_files
 
 
