@@ -114,6 +114,7 @@ class fakeParser:
         self.n_iterations = 1
         self.n_workers = 1
         self.hpo_method = 'rs'
+        self.port = 10000
         
         
 
@@ -133,6 +134,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget',   type=int, help='Maximum (percentage) budget used during the optimization.',    default=100)
     parser.add_argument('--n_iterations', type=int,   help='Number of iterations performed by the optimizer', default=500)
     parser.add_argument('--n_workers', type=int,   help='Number of workers to run in parallel.', default=5)
+    parser.add_argument('--port',   type=int,    default=10000)
     
     args=parser.parse_args()
 #     args = fakeParser()
@@ -161,17 +163,19 @@ if __name__ == "__main__":
     if hpo_method == 'rs':
         hpo_run_id = "RandomSearch"
         # Start a nameserver (see example_3)
-        NS = hpns.NameServer(run_id = hpo_run_id, host='127.0.0.1', port=None)
-        NS.start()
+        NS = hpns.NameServer(run_id = hpo_run_id, host='127.0.0.1', port=0)
+        ns_host, ns_port = NS.start()
     elif hpo_method == 'bohb':
         hpo_run_id = "BOHB"
-        NS = hpns.NameServer(run_id = hpo_run_id, host='127.0.0.1', port=None)
-        NS.start()
+        NS = hpns.NameServer(run_id = hpo_run_id, host='127.0.0.1', port=0)
+        ns_host, ns_port = NS.start()
 
+    print(ns_host,':', ns_port)
+        
     workers=[]
     for i in range(args.n_workers):
         worker = HpoWorker(dataset, workdir, ranklib_location, norm_params, ranker_type,trec_eval_command, 
-                           metric2t, million_tickets, nameserver='127.0.0.1',run_id=hpo_run_id, id=i)
+                           metric2t, million_tickets, nameserver=ns_host, nameserver_port=ns_port, run_id=hpo_run_id, id=i)
         worker.run(background=True)
         workers.append(worker)
 
@@ -181,6 +185,8 @@ if __name__ == "__main__":
     if hpo_method == 'rs':
         rs = RS(  configspace = worker.get_configspace(),
                               run_id = hpo_run_id, 
+                              nameserver=ns_host,
+                              nameserver_port=ns_port,
                               min_budget = args.max_budget, max_budget = args.max_budget
                        )
         res = rs.run(n_iterations = args.n_iterations, min_n_workers = args.n_workers)
