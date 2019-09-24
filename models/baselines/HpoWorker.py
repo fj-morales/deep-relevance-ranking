@@ -7,8 +7,6 @@ import ConfigSpace.hyperparameters as CSH
 
 from hpbandster.core.worker import Worker
 
-
-
 from ir_utils import *
 
 # HPO server and stuff
@@ -28,6 +26,7 @@ import copy
 from eval_utils import *
 import numpy as np
 
+import numpy as np
 
 # model
 
@@ -262,7 +261,7 @@ class HpoWorker(Worker):
                 train_features_file =  fold_dir + self.dataset + '_' + 'train' + '_features'
 
 
-                budget_train_features_file = train_data_file
+#                 budget_train_features_file = train_data_file
 
 
                 # Compute results for one fold
@@ -271,8 +270,8 @@ class HpoWorker(Worker):
 
                 cv_results_dict['s' + fold] = one_fold_results
 
-            cv_mean_metric = round(np.mean([value['loss'] for key,value in cv_results_dict.items()]), 8)
-            cv_std_metric = round(np.std([value['loss'] for key,value in cv_results_dict.items()]), 8)
+            cv_mean_metric = round(np.mean([value['metric'] for key,value in cv_results_dict.items()]), 8)
+            cv_std_metric = round(np.std([value['metric'] for key,value in cv_results_dict.items()]), 8)
             
             cv_results_dict['mean_metric'] = cv_mean_metric
             cv_results_dict['std_metric'] = cv_std_metric
@@ -295,8 +294,8 @@ class HpoWorker(Worker):
             :return: ConfigurationsSpace-Object
             """
             cs = CS.ConfigurationSpace()
-
-            n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=1, upper=100, default_value=10, q=5, log=False)
+            
+            n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=5, upper=100, default_value=10, q=5, log=False)
             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.01, upper=0.5, default_value=0.1, q=0.01, log=False)
             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=100, upper=2000, default_value=1000, q=50 ,log=False)
             
