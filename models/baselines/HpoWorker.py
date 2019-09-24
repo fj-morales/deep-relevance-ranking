@@ -166,7 +166,7 @@ def compute_one_fold(budget, config, tickets, save_model_prefix, run_file_prefix
 
             #import IPython; IPython.embed()
             return ({
-                    'loss': 1 - val_map, # remember: HpBandSter always minimizes!
+                    'metric': val_map,
                     'info': val_results
             })
 
@@ -271,15 +271,15 @@ class HpoWorker(Worker):
 
                 cv_results_dict['s' + fold] = one_fold_results
 
-            cv_mean_loss = round(np.mean([value['loss'] for key,value in cv_results_dict.items()]), 8)
-            cv_std_loss = round(np.std([value['loss'] for key,value in cv_results_dict.items()]), 8)
+            cv_mean_metric = round(np.mean([value['loss'] for key,value in cv_results_dict.items()]), 8)
+            cv_std_metric = round(np.std([value['loss'] for key,value in cv_results_dict.items()]), 8)
             
-            cv_results_dict['mean_loss'] = cv_mean_loss
-            cv_results_dict['std_loss'] = cv_std_loss
+            cv_results_dict['mean_metric'] = cv_mean_metric
+            cv_results_dict['std_metric'] = cv_std_metric
             
             
             return ({
-                'loss': 1 - cv_mean_loss, # remember: HpBandSter always minimizes!
+                'loss': 1 - cv_mean_metric, # remember: HpBandSter always minimizes!
                 'info': cv_results_dict
             })                
             
