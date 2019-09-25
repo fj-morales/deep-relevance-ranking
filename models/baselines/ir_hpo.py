@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 
-# REMOVE!!
 from ir_utils import *
 
 # model
@@ -19,7 +18,7 @@ from HpoWorker import *
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
 
-# from hpbandster.core.worker import Worker
+
 
 # HPO server and stuff
 
@@ -36,6 +35,8 @@ from hpbandster.optimizers import RandomSearch as RS
 
 import random
 import pickle
+
+from datetime import datetime
 
 import logging
 logging.basicConfig(level=logging.WARNING)
@@ -217,12 +218,15 @@ if __name__ == "__main__":
 
     # Save results for further_analysis
 
-    results_file = workdir + dataset + '_' + 'hpo_results_' + hpo_method + '.pickle'
+    # current date and time
+    now = datetime.now()
+    timestamp = datetime.timestamp(now)
+
+    results_file = workdir + dataset + '_' + 'hpo_results_' + hpo_method + '_' + timestamp +'.pickle'
 
     results = {'hpo_config': args,
                 'hpo_results': res
-
-    }
+              }
 
     pickle.dump(results, open(results_file, "wb" ) )
 
