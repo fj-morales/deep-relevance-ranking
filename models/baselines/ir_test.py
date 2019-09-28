@@ -48,7 +48,7 @@ def test_model(workdir, dataset, ranklib_location, trec_eval_command, normalizat
     elif dataset == 'robust':
         folds = ['1','2','3','4','5']
 
-    cv_results_dict = {}
+    results_dict = {}
 
     for fold in folds:
 
@@ -79,4 +79,6 @@ def test_model(workdir, dataset, ranklib_location, trec_eval_command, normalizat
         print(trec_eval_command, qrels_test_file, run_test_file)
         test_results = eval(trec_eval_command, qrels_test_file, run_test_file)
         
-        return test_results
+        results_dict['s' + fold] = test_results
+        
+    return results_dict
