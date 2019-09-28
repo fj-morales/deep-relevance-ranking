@@ -105,6 +105,7 @@ class L2Ranker:
   
 
     def gen_run_file(self, test_data_file, run_file):
+        # Works also for testing
         pre_run_file = run_file.replace('run_', 'pre_run_', 1)
         toolkit_parameters = [
                                 *self.ranker_command, # * to unpack list elements
