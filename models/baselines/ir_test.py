@@ -1,32 +1,8 @@
+import sys
 import subprocess
+from eval_utils import *
 
-def eval(trec_eval_command, qrel, qret):
-    
-    metrics = '-m map -m P.20 -m ndcg_cut.20'
-    toolkit_parameters = [
-                            trec_eval_command,
-                            '-m',
-                            'map',
-                            '-m',
-                            'P.20',
-                            '-m',
-                            'ndcg_cut.20',
-                            qrel,
-                            qret]
-
-    print(toolkit_parameters)
-
-    proc = subprocess.Popen(toolkit_parameters, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
-    (out, err) = proc.communicate()
-#     print(out.decode("utf-8"))
-    print('Run error: ', err)
-    if err == None:
-        pass
-#         print('No errors')
-    out_split = out.decode("utf-8").replace('\tall\t','').splitlines()
-    out_dict = {item.split()[0]:item.split()[1] for item in out_split}
-    return out_dict
-
+# Functions
 def generate_run_file(pre_run_file, run_file):
     
     with open(pre_run_file, 'rt') as input_f:
@@ -62,7 +38,7 @@ def gen_run_file(ranklib_location, normalization, save_model_file, test_data_fil
 
     
     
-def test_model(workdir, dataset, normalization, res):
+def test_model(workdir, dataset, ranklib_location, trec_eval_command, normalization, res):
     
     if dataset == 'bioasq':
         folds = ['']
@@ -82,7 +58,7 @@ def test_model(workdir, dataset, normalization, res):
             fold_dir = workdir + 's' + fold + '/'
             dataset_fold = dataset + '_s' + fold
             test_data_file = fold_dir + dataset + '_test' + '_s' + fold +  '_features'
-            qrels_test_file = fold_dir + self.dataset + '_test' + '_s' + fold + '_qrels'
+            qrels_test_file = fold_dir + dataset + '_test' + '_s' + fold + '_qrels'
 
 
         ## Evaluate on test
@@ -97,6 +73,7 @@ def test_model(workdir, dataset, normalization, res):
         
         gen_run_file(ranklib_location, normalization, best_model, test_data_file, run_test_file)
     
+        print(trec_eval_command, qrels_test_file, run_test_file)
         test_results = eval(trec_eval_command, qrels_test_file, run_test_file)
         
         return test_results
