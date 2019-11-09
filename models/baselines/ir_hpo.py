@@ -111,7 +111,9 @@ if __name__ == "__main__":
     parser.add_argument('--max_budget',   type=int, help='Maximum (percentage) budget used during the optimization.',    default=100)
     parser.add_argument('--n_iterations', type=int,   help='Number of iterations performed by the optimizer', default=500)
     parser.add_argument('--n_workers', type=int,   help='Number of workers to run in parallel.', default=5)
-    parser.add_argument('--default_config', action='store_true', )
+    parser.add_argument('--default_config', action='store_true' )
+    parser.add_argument('--norm', action='store_true' )
+    
     
     args=parser.parse_args()
     
@@ -142,8 +144,11 @@ if __name__ == "__main__":
     ranker_type = '6' # LambdaMART
     
     # normalization: Feature Engineering?
-    norm_params = ['-norm', 'zscore'] # 'sum', 'zscore', 'linear'
-    
+    if args.norm:
+        norm_params = ['-norm', 'zscore'] # 'sum', 'zscore', 'linear'
+#         norm_params = ['-norm', 'linear'] # 'sum', 'zscore', 'linear'
+    else:
+        norm_params = [] 
     
     if hpo_method == 'rs':
         hpo_run_id = "RandomSearch"
