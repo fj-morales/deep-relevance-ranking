@@ -80,7 +80,8 @@ class L2Ranker:
                                 '-train',
                                 train_data_file,
                                 *self.normalization,
-                                *self.params,
+#                                 *self.params[2:], #[2:] means no validation data while training model
+                                *self.params, 
                                 '-leaf', 
                                 str(config['n_leaves']),
                                 '-shrinkage',

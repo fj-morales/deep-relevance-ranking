@@ -231,17 +231,14 @@ class HpoWorker(Worker):
                     l2r_model = '_lmart_'
                     
                 confdir = './' + self.dataset + '_config/'
-                enabled_features_file = confdir + self.dataset + l2r_model + 'enabled_features'
-                    
-                
-                
+                enabled_features_file = confdir + self.dataset + l2r_model + 'enabled_features' 
 
                 l2r_params = [
                     '-validate',
                     val_data_file,
                     '-ranker',
                     self.ranker_type,
-#                     '1', #Ranknet: 1; Linear L2: 9; LambdaMART: 6
+#                     '9', #Ranknet: 1; Linear L2: 9; LambdaMART: 6
 #                     '-L2',
 #                     '0',
                     
@@ -288,9 +285,6 @@ class HpoWorker(Worker):
                 'info': cv_results_dict
             })                
             
-    
-            
-        
     @staticmethod
     def get_configspace(default_config):
             """
@@ -301,13 +295,13 @@ class HpoWorker(Worker):
             """
             cs = CS.ConfigurationSpace()
             
-#             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=5, upper=100, default_value=10, q=5, log=False)
-#             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.01, upper=0.5, default_value=0.1, q=0.01, log=False)
-#             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=100, upper=2000, default_value=1000, q=50 ,log=False)
-
             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=5, upper=100, default_value=10, q=5, log=False)
-            learning_rate = CSH.OrdinalHyperparameter('learning_rate', sequence=[0.1])
-            n_trees = CSH.OrdinalHyperparameter('n_trees', sequence=[1000])
+            learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.01, upper=0.5, default_value=0.1, q=0.01, log=False)
+            n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=100, upper=2000, default_value=1000, q=50 ,log=False)
+
+#             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=5, upper=100, default_value=10, q=5, log=False)
+#             learning_rate = CSH.OrdinalHyperparameter('learning_rate', sequence=[0.1])
+#             n_trees = CSH.OrdinalHyperparameter('n_trees', sequence=[1000])
             
 #             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=10, upper=11, default_value=10, log=False)
 #             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.1, upper=0.2, default_value=0.1, q=0.1, log=False)
