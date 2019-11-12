@@ -18,8 +18,6 @@ from HpoWorker import *
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
 
-
-
 # HPO server and stuff
 
 import argparse
@@ -80,9 +78,6 @@ def get_train_budget_data_file(budget, query_list, train_data_file):
 
 # In[6]:
 
-
-
-
 class fakeParser:
     def __init__(self):
         self.dataset = 'bioasq' 
@@ -110,8 +105,26 @@ if __name__ == "__main__":
     parser.add_argument('--n_workers', type=int,   help='Number of workers to run in parallel.', default=5)
     parser.add_argument('--default_config', action='store_true' )
     parser.add_argument('--norm', action='store_true' )
+    parser.add_argument('--test_mode', action='store_true', help='Test specific hyperparameter configuration' )
+    parser.add_argument('--leaf', type=int, help='Number of leaves. Only works with test mode.' , default=10)
+    parser.add_argument('--lr', type=float, help='Learning rate. Only works with test mode.' , default=0.1)
+    parser.add_argument('--tree', type=int, help='Number of trees. Only works with test mode.' , default=1000)
     
     args=parser.parse_args()
+#     args = fakeParser()
+    
+    dataset = args.dataset
+    workdir = './' + dataset + '_dir/'
+    
+    # current date and time
+    now = datetime.now()
+    timestamp = int(datetime.timestamp(now))
+    
+    
+    
+    
+    if args.test_mode:
+        args.default_config = True
     
     if args.default_config:
         print('Using default HPO config values and only one worker, iteration, max_budget, and rs method.\n')
@@ -119,36 +132,32 @@ if __name__ == "__main__":
         args.min_budget = 100
         args.max_budget = 100
         args.n_iterations = 1
-        args.n_workers = 1
-#     args = fakeParser()
-    
+        args.n_workers = 1    
+
     hpo_method = args.hpo_method
+    hpo_results_dir = workdir + 'hpo_results' + '_' + hpo_method + '_' + str(timestamp) + '/'
+
+    
+    inter_results_file = dataset + '_results_' + hpo_method + '_' + str(timestamp) + '.pkl'
+    if (args.default_config == False) and (args.test_mode == False):
+        result_logger = hpres.json_result_logger(directory=hpo_results_dir, overwrite=False)
+    else:
+        result_logger = None
         
     million_tickets = tickets(1000000)
-
-    len(million_tickets)
-
-    dataset = args.dataset
-    workdir = './' + dataset + '_dir/'
-    
-    hpo_results_dir = workdir + 'hpo_results' + '_' + hpo_method + '/'
-    
-    destroy_dir(hpo_results_dir)
+        
     
 #     data_split =  'train'
     ranklib_location = '../../../ranklib/'
     trec_eval_command = '../../eval/trec_eval'
     
-    now = datetime.now()
-    timestamp = datetime.timestamp(now)
     
-    inter_results_file = dataset + '_results_' + hpo_method + '_' + str(timestamp) + '.pkl'
     
     metric2t = 'MAP' # 'MAP, NDCG@k, DCG@k, P@k, RR@k, ERR@k (default=ERR@10)'
     
     ranker_type = '6' # LambdaMART
     
-    result_logger = hpres.json_result_logger(directory=hpo_results_dir, overwrite=False)
+    
     
     # normalization: Feature Engineering?
     if args.norm:
@@ -180,36 +189,44 @@ if __name__ == "__main__":
     # Random search
 
     if hpo_method == 'rs':
-        rs = RS(  configspace = worker.get_configspace(args.default_config),
+        hpo_worker = RS(  configspace = worker.get_configspace(args.default_config, 
+                                                       args.test_mode,
+                                                       args.leaf,
+                                                       args.lr,
+                                                       args.tree
+                                                      ),
                               run_id = hpo_run_id, 
                               nameserver=ns_host,
                               nameserver_port=ns_port,
                               result_logger=result_logger,
                               min_budget = args.max_budget, max_budget = args.max_budget
                        )
-        res = rs.run(n_iterations = args.n_iterations, min_n_workers = args.n_workers)
+        res = hpo_worker.run(n_iterations = args.n_iterations, min_n_workers = args.n_workers)
 
         # store results
-        with open(os.path.join(hpo_results_dir, inter_results_file), 'wb') as fh:
-            pickle.dump(res, fh)
-        
-        rs.shutdown(shutdown_workers=True)
+
     elif hpo_method == 'bohb':
-        bohb = BOHB(  configspace = worker.get_configspace(args.default_config),
+        hpo_worker = BOHB(  configspace = worker.get_configspace(args.default_config, 
+                                                           args.test_mode,
+                                                           args.leaf,
+                                                           args.lr,
+                                                           args.tree
+                                                          ),
                               run_id = hpo_run_id, 
                               nameserver=ns_host,
                               nameserver_port=ns_port,
                               result_logger=result_logger,
                               min_budget = args.min_budget, max_budget = args.max_budget
                        )
-        res = bohb.run(n_iterations = args.n_iterations, min_n_workers = args.n_workers)
+        res = hpo_worker.run(n_iterations = args.n_iterations, min_n_workers = args.n_workers)
         
         # store results
+
+    if (args.default_config == False) and (args.test_mode == False):
         with open(os.path.join(hpo_results_dir, inter_results_file), 'wb') as fh:
             pickle.dump(res, fh)
         
-        bohb.shutdown(shutdown_workers=True)
-
+    hpo_worker.shutdown(shutdown_workers=True)
 
     # In[14]:
 
@@ -233,10 +250,6 @@ if __name__ == "__main__":
     print('BEST RESULTS EVER!!: ', test_results)
     
     # Save results for further_analysis
-
-    # current date and time
-    now = datetime.now()
-    timestamp = datetime.timestamp(now)
 
     if args.default_config:
         results_file = workdir + dataset + '_' + 'defaults' + '_' + str(timestamp) +'.pickle'
