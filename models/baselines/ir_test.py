@@ -67,12 +67,14 @@ def test_model(workdir, dataset, ranklib_location, trec_eval_command, normalizat
 
 
         ## Evaluate on test
-
-        run_test_file = fold_dir + 'run_' + dataset_fold + '_best_lmart_test' 
         
         config_results = res.get_runs_by_id(res.get_incumbent_id())
         
         best_model = config_results[0].info['s' + fold]['info']['model_file']
+        
+        suffix = best_model.split('/')[-1].split('_')[-3:]
+        
+        run_test_file = fold_dir + 'run_' + dataset_fold + '_best_lmart_test_' + str(suffix[0]) + '_' + str(suffix[1]) + '_' + str(suffix[2]) 
         
         gen_run_file(ranklib_location, normalization, best_model, test_data_file, run_test_file)
     
