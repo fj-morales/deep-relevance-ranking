@@ -188,7 +188,10 @@ if __name__ == "__main__":
 
 
     # Continue previous runs
-    previous_run = hpres.logged_results_to_HBS_result(args.previous_run_dir)
+    if args.previous_run_dir:
+        previous_run = hpres.logged_results_to_HBS_result(args.previous_run_dir)
+    else:
+        previous_run = None
         
     # Random search
 
