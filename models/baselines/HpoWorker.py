@@ -299,6 +299,11 @@ class HpoWorker(Worker):
             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.01, upper=0.5, default_value=0.1, q=0.01, log=False)
             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=100, upper=2000, default_value=1000, q=50 ,log=False)
             
+#             # Increase spectrum: insane values: 5 328 000 000 total configs!!
+#             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=1, upper=200, default_value=10, q=1, log=False)
+#             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.001, upper=0.9, default_value=0.1, q=0.001, log=False)
+#             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=10, upper=3000, default_value=1000, q=1 ,log=False)
+            
 #             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=10, upper=11, default_value=10, log=False)
 #             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.1, upper=0.2, default_value=0.1, q=0.1, log=False)
 #             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=5, upper=11, default_value=10, q=1, log=False)
