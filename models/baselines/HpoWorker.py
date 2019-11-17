@@ -96,8 +96,8 @@ def get_train_budget_data_file(budget, qid_list, train_data_file):
         print('Budget is outside the limits (10% < b < 100%): ', budget)
         return 'THIS IS NOT WORKING'   
     
-def compute_one_fold(budget, config, tickets, save_model_prefix, run_file_prefix, model_instance, 
-                     qrels_val_file, qid_list, train_data_file, trec_eval_command, *args, **kwargs):
+def compute_one_fold(budget, config, tickets, save_model_prefix, run_file_prefix, run_test_file_prefix, model_instance, 
+                     qrels_val_file, qid_list, train_data_file, trec_eval_command, ranklib_location, *args, **kwargs):
     
             """
             Simple example for a compute function using a feed forward network.
@@ -138,6 +138,7 @@ def compute_one_fold(budget, config, tickets, save_model_prefix, run_file_prefix
             save_model_file = save_model_prefix + config_suffix
             
             run_val_file = run_file_prefix + config_suffix
+            run_test_file = run_test_file_prefix + config_suffix
             
 #             print('Type class of budget variable: ', type(budget))
 #             print(self.qid_list)
@@ -152,13 +153,20 @@ def compute_one_fold(budget, config, tickets, save_model_prefix, run_file_prefix
             model.train(budget_train_features_file, save_model_file, config)
         
             val_data_file = model.params[1]
+            test_data_file = model.test_data_file
             
             model.gen_run_file(val_data_file, run_val_file)
+            model.gen_run_file(test_data_file, run_test_file)
             
             # Evaluate Model
+            qrels_test_file = qrels_val_file.replace('dev', 'test')
             
             val_results = eval(trec_eval_command, qrels_val_file, run_val_file)
+            print('Validation results: ', val_results)
+            test_results = eval(trec_eval_command, qrels_test_file, run_test_file)
+            
             val_results['model_file'] = save_model_file
+            val_results['test_results'] = test_results
             
             val_map = float(val_results['map'])
 #             print('Aqui pedi imprimir map\n', val_map, config, '\n')
@@ -249,11 +257,12 @@ class HpoWorker(Worker):
                 ]
 
                 # Run train
-                lmart_model = L2Ranker(self.ranklib_location, l2r_params, self.norm_params)
+                lmart_model = L2Ranker(self.ranklib_location, l2r_params, test_data_file, self.norm_params)
 
                 save_model_prefix = fold_dir + dataset_fold + l2r_model
 
                 run_file_prefix = fold_dir + 'run_' + dataset_fold + l2r_model
+                run_test_file_prefix = fold_dir + 'run_tests_' + dataset_fold + l2r_model
 
                 # Preparing budgeted train features data 
                 query_list = load_queries(train_queries_file)
@@ -268,8 +277,8 @@ class HpoWorker(Worker):
 
 
                 # Compute results for one fold
-                one_fold_results = compute_one_fold(budget, config, self.tickets, save_model_prefix, run_file_prefix, lmart_model, 
-                                                     qrels_val_file, qid_list, train_data_file, self.trec_eval_command)
+                one_fold_results = compute_one_fold(budget, config, self.tickets, save_model_prefix, run_file_prefix, run_test_file_prefix, lmart_model, 
+                                                     qrels_val_file, qid_list, train_data_file, self.trec_eval_command, self.ranklib_location)
 
                 cv_results_dict['s' + fold] = one_fold_results
 
@@ -295,6 +304,7 @@ class HpoWorker(Worker):
             """
             cs = CS.ConfigurationSpace()
             
+            # This is the good one!
             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=5, upper=100, default_value=10, q=5, log=False)
             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.01, upper=0.5, default_value=0.1, q=0.01, log=False)
             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=100, upper=2000, default_value=1000, q=50 ,log=False)
@@ -304,9 +314,9 @@ class HpoWorker(Worker):
 #             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.001, upper=0.9, default_value=0.1, q=0.001, log=False)
 #             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=10, upper=3000, default_value=1000, q=1 ,log=False)
             
-#             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=10, upper=11, default_value=10, log=False)
+#             n_leaves = CSH.UniformIntegerHyperparameter('n_leaves', lower=1, upper=2, default_value=2, log=False)
 #             learning_rate = CSH.UniformFloatHyperparameter('learning_rate', lower=0.1, upper=0.2, default_value=0.1, q=0.1, log=False)
-#             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=5, upper=11, default_value=10, q=1, log=False)
+#             n_trees = CSH.UniformIntegerHyperparameter('n_trees', lower=1, upper=2, default_value=1, q=1, log=False)
 
             if default_config:
                 n_leaves = CSH.OrdinalHyperparameter('n_leaves', sequence=[10])
