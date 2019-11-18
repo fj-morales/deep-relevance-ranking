@@ -285,8 +285,14 @@ class HpoWorker(Worker):
             cv_mean_metric = round(np.mean([value['metric'] for key,value in cv_results_dict.items()]), 8)
             cv_std_metric = round(np.std([value['metric'] for key,value in cv_results_dict.items()]), 8)
             
+            cv_mean_metric_test = round(np.mean([float(value['info']['test_results']['map']) for key,value in cv_results_dict.items()]), 8)
+            cv_std_metric_test = round(np.std( [float(value['info']['test_results']['map']) for key,value in cv_results_dict.items()]), 8)
+            
             cv_results_dict['mean_metric'] = cv_mean_metric
             cv_results_dict['std_metric'] = cv_std_metric
+            
+            cv_results_dict['mean_metric_test'] = cv_mean_metric_test
+            cv_results_dict['std_metric_test'] = cv_std_metric_test
             
             
             return ({
