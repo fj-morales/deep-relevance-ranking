@@ -108,7 +108,7 @@ class fakeParser:
         self.dataset = 'bioasq' 
 #         self.build_index = True
         self.build_index = None
-        self.data_spli = 'all'
+        self.data_split = 'all'
         self.fold = '1'
         self.gen_features = True
 #         self.gen_features = None
@@ -153,18 +153,21 @@ if __name__ == "__main__":
 
         if args.dataset == 'bioasq':
             train_features_file = './bioasq_dir/bioasq_train_features'
-    #         val_features_file = './bioasq_dir/bioasq_dev_features'
+            dev_features_file = './bioasq_dir/bioasq_dev_features'
             test_features_file = './bioasq_dir/bioasq_test_features'
 
-            run_linear_model_file = workdir + 'run_' + dataset + '_linearModel_test_filtered'
+            run_linear_model_test_file = workdir + 'run_' + dataset + '_linearModel_test_filtered'
+            run_linear_model_dev_file = workdir + 'run_' + dataset + '_linearModel_dev_filtered'
+            run_linear_model_train_file = workdir + 'run_' + dataset + '_linearModel_train_filtered'
             qrels_file = workdir + dataset + '_test_qrels'
             run_bm25_file = workdir + 'run_bm25_' + dataset + '_test_filtered'
 
         elif args.dataset == 'robust':
             train_features_file = fold_dir+ 'robust_train_s' + fold + '_features'
-    #         val_features_file = fold_dir+ 'robust_dev_s' + fold + '_features'
+            dev_features_file = fold_dir+ 'robust_dev_s' + fold + '_features'
             test_features_file = fold_dir + 'robust_test_s' + fold + '_features'
-            run_linear_model_file = fold_dir + 'run_robust_linearModel_test_s' + fold
+            run_linear_model_test_file = fold_dir + 'run_robust_linearModel_test_s' + fold
+            run_linear_model_dev_file = fold_dir + 'run_robust_linearModel_dev_s' + fold
             qrels_file = fold_dir + 'robust_test_s' + fold + '_qrels'
             run_bm25_file = fold_dir + 'run_bm25_robust_test_s' + fold
 
@@ -172,20 +175,15 @@ if __name__ == "__main__":
         linear_model = train_linear_model(train_features_file)
 
         # predict
-        ranked_dict = predict(test_features_file, linear_model)
+        ranked_dict_test = predict(test_features_file, linear_model)
+        ranked_dict_dev = predict(dev_features_file, linear_model)
 
         # In[10]:
 
-        write_predictions_run_file(ranked_dict, run_linear_model_file)
+        write_predictions_run_file(ranked_dict_test, run_linear_model_test_file)
+        write_predictions_run_file(ranked_dict_dev, run_linear_model_dev_file)
 
         # In[17]:
-
-        # BM25+Extra features linear model
-        trec_eval_command = '../../eval/trec_eval'
-        linear_model_results = eval(trec_eval_command, qrels_file, run_linear_model_file)
-        linear_model_results['model'] = 'bm25+extra'
-        linear_model_results['model_file'] = run_linear_model_file
-        print('Linear model results: \n', linear_model_results)
         
         # BM25 (default, vanilla)  model
         trec_eval_command = '../../eval/trec_eval'
@@ -193,5 +191,14 @@ if __name__ == "__main__":
         bm25_results['model'] = 'bm25+extra'
         bm25_results['model_file'] = run_bm25_file
         print('BM25 (default) results: \n', bm25_results)
+        
+        # BM25+Extra features linear model on  TEST set only
+        trec_eval_command = '../../eval/trec_eval'
+        linear_model_results = eval(trec_eval_command, qrels_file, run_linear_model_test_file)
+        linear_model_results['model'] = 'bm25+extra'
+        linear_model_results['model_file'] = run_linear_model_test_file
+        print('Linear model results: \n', linear_model_results)
+        
+
         
 
