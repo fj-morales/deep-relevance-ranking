@@ -198,7 +198,3 @@ if __name__ == "__main__":
         linear_model_results['model'] = 'bm25+extra'
         linear_model_results['model_file'] = run_linear_model_test_file
         print('Linear model results: \n', linear_model_results)
-        
-
-        
-
