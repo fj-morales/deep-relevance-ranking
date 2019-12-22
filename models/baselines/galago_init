@@ -1,6 +1,0 @@
-GALAGO_HOME=./galago-3.10-bin
-PATH=$PATH:$HOME/bin:$GALAGO_HOME/bin
-export GALAGO_HOME
-export JRE_HOME
-export PATH
-

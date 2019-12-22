@@ -69,7 +69,8 @@ if __name__ == '__main__':
 
 		trec_evaluate(qrels_temp_file, qret_temp_file)
 	finally:
-		os.remove(qrels_temp_file)
-		os.remove(qret_temp_file)
-		os.rmdir(temp_dir)
+		pass
+#		os.remove(qrels_temp_file)
+#		os.remove(qret_temp_file)
+#		os.rmdir(temp_dir)
 

@@ -8,7 +8,7 @@
        <name>krovetz</name>
      </stemmer>
      <corpus>
-       <path>./robust_dir/robust_corpus</path>        
+       <path>/ssd2/francisco/robust_corpus/</path>        
        <class>trectext</class>
      </corpus>
      <field><name>TEXT</name></field>
