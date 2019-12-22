@@ -19,6 +19,8 @@ For BioASQ, download the [PubMed](https://www.nlm.nih.gov/databases/download/pub
 
 `conda env create -f environment.yml`
 
+The next steps must be executed from `./deep-relevance-ranking/model/baselines dir`.
+
 **Step 2**: Preprocess corpus and building indexes
 
   `dataset=bioasq; python ir_indexing.py --dataset $dataset --data_dir=</path/to/pubmed/xmlfiles> --preprocess --pool_size 10` 
