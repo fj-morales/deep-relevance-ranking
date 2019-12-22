@@ -9,7 +9,7 @@
 import os
 
 # import bioasq_corpus_parser
-import utils
+import ir_utils
 import multiprocessing
 from functools import partial
 
@@ -45,7 +45,7 @@ def process_file(to_index_dir,file):
     outdir = to_index_dir + '/'.join(file.split('/')[-2:-1]) + '/'
     
     
-    utils.create_dir(outdir)
+    ir_utils.create_dir(outdir)
     
     file_out = outdir + filename
     
@@ -75,7 +75,7 @@ def process_file(to_index_dir,file):
 
                 if open_tag:
     #                 print('change')
-                    line = utils.remove_sc(line) + '\n'
+                    line = ir_utils.remove_sc(line) + '\n'
 
                 out_f.write(line)
                 print('Saved :', file_out)    
@@ -102,7 +102,7 @@ def corpus_parser(data_dir, to_index_dir, pool_size):
     
 #     pool_size = 10
     
-    utils.create_dir(to_index_dir)
+    ir_utils.create_dir(to_index_dir)
     
     corpus_files = get_filenames(data_dir)
     print(len(corpus_files))

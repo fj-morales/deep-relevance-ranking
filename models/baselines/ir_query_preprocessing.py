@@ -35,7 +35,7 @@ import argparse
 ## My libraries
 
 import eval_utils
-import utils
+import ir_utils
 import bioasq_corpus_parser
 # import bioasq_query_parser
 import query_parser
@@ -54,7 +54,7 @@ class Query:
 #     def build(self, ir_tool_params):
     def run(self):
         
-#         utils.create_dir(self.index_location)
+#         ir_utils.create_dir(self.index_location)
     
         query_command = self.ir_toolkit_location + 'runquery/IndriRunQuery'
         toolkit_parameters = [
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     dataset = args.dataset
     workdir = './' + dataset + '_dir/'
     to_index_dir =  workdir + dataset + '_corpus/'
-    utils.create_dir(workdir)
+    ir_utils.create_dir(workdir)
     confdir = './' + dataset + '_config/'
     parameter_file_location = confdir + dataset + '_index_param_file'
     stopwords_file = confdir + 'stopwords'
@@ -199,7 +199,7 @@ if __name__ == "__main__":
             fold_dir = workdir
         else:
             fold_dir = workdir + 's' + fold + '/'
-        utils.create_dir(fold_dir)
+        ir_utils.create_dir(fold_dir)
     #     # Generate qrels and qret
 
         if args.data_split == 'all':

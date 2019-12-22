@@ -18,7 +18,7 @@ import sys
 import shutil
 
 # my modules
-import utils
+import ir_utils
 from ir_utils import load_queries
 
 
@@ -38,7 +38,7 @@ def trec_queries(queries):
     for q in queries:
 #         print(q['body'])
 #         text = q['body']
-        text = utils.remove_sc(q['body'])
+        text = ir_utils.remove_sc(q['body'])
 #         print(text)
     
 #         text = re.sub(r'[^\w\s]',' ',text)

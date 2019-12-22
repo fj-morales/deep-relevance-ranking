@@ -34,9 +34,9 @@ class Index:
 #     def build(self, ir_tool_params):
     def build(self):
         
-#         utils.create_dir(self.index_location)
+#         ir_utils.create_dir(self.index_location)
     #     index_loc_param = '--indexPath=' + index_loc
-        utils.create_dir(self.index_dir)
+        ir_utils.create_dir(self.index_dir)
         build_index_command = self.ir_toolkit_location + 'buildindex/IndriBuildIndex'
         toolkit_parameters = [
                                 build_index_command,

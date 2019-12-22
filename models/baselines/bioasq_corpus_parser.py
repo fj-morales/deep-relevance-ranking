@@ -14,7 +14,7 @@ import json
 import subprocess
 
 import multiprocessing
-import utils
+import ir_utils
 import re 
 import sys
 # sys.path.append('qra_cod')
@@ -175,7 +175,7 @@ def corpus_parser(data_dir, to_index_dir, pool_size):
 #     data_dir = '/ssd/francisco/pubmed19/'
 #     to_index_dir = './bioasq_dir/bioasq_corpus/' # TODO Fix, pass to multiprocessing!
 
-    utils.create_dir(to_index_dir)
+    ir_utils.create_dir(to_index_dir)
     
     pubmed_files = get_filenames(data_dir)
 
