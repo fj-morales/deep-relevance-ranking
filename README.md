@@ -1,38 +1,54 @@
 # Deep Relevance Ranking Using Enhanced Document-Query Interactions
 
-This software accompanies  the following paper:
->R. McDonald, G. Brokos and I. Androutsopoulos, "Deep Relevance Ranking Using Enhanced Document-Query Interactions". Proceedings of the Conference on Empirical Methods in Natural Language Processing (EMNLP 2018), Brussels, Belgium, 2018. [[PDF](http://nlp.cs.aueb.gr/pubs/emnlp2018.pdf)], [[appendix](http://nlp.cs.aueb.gr/pubs/emnlp2018_appendix.pdf)]
+This is a modified fork of the [[deep-relevance-ranking original](https://github.com/nlpaueb/deep-relevance-ranking)] repository for reproducibility purposes.
 
-It contains the code of the deep relevance ranking models described in the paper, which can be used to rerank the top-k documents returned by a BM25 based search engine.
+## Replication of POSIT-DRMM+MV effectiveness results
 
-# Instructions
-This is a Python 3.6 project.
+To replicate he effectiveness results for POSIT-DRMM+MV, please, follow the [[installation](https://github.com/nlpaueb/deep-relevance-ranking))] and [[running](https://github.com/nlpaueb/deep-relevance-ranking/tree/master/models/drmm)] instructions of the original repository.
 
-**Step 1**: Install the required Python packages: 
+## Reproduction of BM25+extra model
 
-```
-pip3 install -r requirements.txt
-```
 
-**Step 2**: Download the dataset(s) you intend to use (BioASQ and/or TREC ROBUST2004). 
+**Step 1**: Install the required Python packages and extra requirements: 
 
-```
-sh get_bioasq_data.sh
-sh get_robust04_data.sh
-```
+`conda env create -f environment.yml`
+`sudo apt-get install oracle-java11-installer-local`
 
-For each dataset, the following data are provided (among other files):
+**Step 2**: Preprocess corpus and building indexes
 
-* Top-k documents retrieved by a BM25 based search engine ([Galago](http://www.lemurproject.org/galago.php)) for each query of the corresponding dataset.
-* Pre-trained word embeddings
-* IDF values
+  `dataset=bioasq; python ir_indexing.py --dataset $dataset --preprocess --pool_size 10` 
 
-*Note: Downloading time may vary depending on server availability.*
+  `dataset=robust; python ir_indexing.py --dataset $dataset`
 
-**Step 3**: Navigate to a models directory to train the specific model and evaluate its performance on the test set. E.g. navigate to the PACRR (and PACRR-DRMM) model:
-```
-cd models/pacrr
-```
-Consult the README file of each model for dedicated instructions (e.g. [instructions for PACRR](https://github.com/nlpaueb/deep-relevance-ranking/tree/master/models/pacrr#pacrr)).
+**Step 3**: Queries and qrels preprocessing
 
-(Under construction.)
+  `dataset=bioasq; python ir_query_preprocessing.py --dataset $dataset --data_split all --pool_size 20 --fold all`
+  `dataset=robust; python ir_query_preprocessing.py --dataset $dataset --data_split all --pool_size 20 --fold all`
+
+**Step 4**: Extract features
+
+  `dataset=bioasq; python ir_gen_features.py --dataset $dataset --data_split all --fold all`
+  `dataset=robust; python ir_gen_features.py --dataset $dataset --data_split all --fold all`
+
+**Step 5**: BM25+extra and vanilla bm25 features model evaluation
+
+  `dataset=bioasq; python ir_bm25_extra_features.py --dataset $dataset --data_split all --fold all`
+  `dataset=robust; python ir_bm25_extra_features.py --dataset $dataset --data_split all --fold all`
+
+**Step 6**: LambdaMART default (n_tree = 1000; learning_rate = 0.1; n_leaves = 10; early_Stop = 100)
+
+  `dataset=bioasq; python3 ir_hpo.py --dataset $dataset --default_config`
+  `dataset=robust; python3 ir_hpo.py --dataset $dataset --default_config`
+
+**Step 7**: LambdaMART HPO: RS and BOHB
+
+  `dataset=bioasq; hpo=rs; python3 ir_hpo.py --dataset $dataset --hpo_method $hpo --min_budget 100 --max_budget 100 --n_iterations 200 --n_workers 1`
+  `dataset=bioasq; hpo=bohb; python3 ir_hpo.py --dataset $dataset --hpo_method $hpo --min_budget 30 --max_budget 100 --n_iterations 200 --n_workers 1`
+
+  `dataset=robust; hpo=rs; python3 ir_hpo.py --dataset $dataset --hpo_method $hpo --min_budget 100 --max_budget 100 --n_iterations 200 --n_workers 1`
+  `dataset=robust; hpo=bohb; python3 ir_hpo.py --dataset $dataset --hpo_method $hpo --min_budget 30 --max_budget 100 --n_iterations 200 --n_workers 1`
+
+**Step 8** LambdaMART test best found model:
+ 
+  `dataset=bioasq; python3 ir_hpo.py --dataset $dataset --test --leaf 15 --tree 1400 --lr 0.07`
+  `dataset=robust; python3 ir_hpo.py --dataset $dataset --test --leaf 25 --tree 450 --lr 0.03`
