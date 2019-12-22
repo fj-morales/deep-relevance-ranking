@@ -74,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument('--preprocess', action='store_true')
     parser.add_argument('--dataset',   type=str, help='')
     parser.add_argument('--pool_size', type=int, help='')
+    parser.add_argument('--data_dir', type=str, help='')
     
     args=parser.parse_args()
 #     args = fakeParser()
@@ -93,11 +94,11 @@ if __name__ == "__main__":
 #     # Options
 #     data_dir = '/ssd/francisco/pubmed19-test/'
     if args.dataset == 'robust':
-        data_dir = '/ssd/francisco/deep-relevance-ranking/robust04_data/collection/'
+        #data_dir = '/ssd/francisco/deep-relevance-ranking/robust04_data/collection/'
+        data_dir = args.data_dir
     elif args.dataset == 'bioasq':
-        data_dir = '/ssd/francisco/pubmed19/'
-        
-    
+        #data_dir = '/ssd/francisco/pubmed19/'
+        data_dir = args.data_dir
     
      
     if args.dataset == 'bioasq':
