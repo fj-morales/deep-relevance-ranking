@@ -16,7 +16,7 @@ import argparse
 ## My libraries
 
 import eval_utils
-import utils
+import ir_utils
 import bioasq_corpus_parser
 import query_parser
 # from ir_utils import *
