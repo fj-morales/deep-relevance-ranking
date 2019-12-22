@@ -9,6 +9,7 @@ To replicate he effectiveness results for POSIT-DRMM+MV, please, follow the [[in
 **For the following experiments, you require a copy of the document collections for Robust04 and BioASQ in natural language**
 
 For Robust04, visit the [NIST(https://trec.nist.gov/data/cd45/index.html)] website.
+
 For BioASQ, download the [PubMed(https://www.nlm.nih.gov/databases/download/pubmed_medline.html)] 2018 baseline collection. 
 
 ## Reproduction of BM25+extra model
