@@ -25,10 +25,10 @@ The next steps must be executed from `./deep-relevance-ranking/model/baselines d
 
 **Step 2**: Preprocess corpus and building indexes
 
-  `dataset=bioasq; python ir_indexing.py --dataset $dataset --data_dir=</path/to/pubmed/xmlfiles> --preprocess --pool_size 10` 
+  `dataset=bioasq; python ir_indexing.py --dataset $dataset --data_dir </path/to/pubmed/xmlfiles> --preprocess --pool_size 10` 
 
   
-  `dataset=robust; python ir_indexing.py --dataset $dataset --data_dir=</path/to/robust04/xmlfiles>`
+  `dataset=robust; python ir_indexing.py --dataset $dataset --data_dir </path/to/robust04/xmlfiles>`
 
 **Step 3**: Queries and qrels preprocessing
 
