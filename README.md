@@ -9,10 +9,9 @@ To replicate he effectiveness results for POSIT-DRMM+MV, please, follow the [[in
 ## Reproduction of BM25+extra model
 
 
-**Step 1**: Install the required Python packages and extra requirements: 
+**Step 1**: Install the required Python packages: 
 
 `conda env create -f environment.yml`
-`sudo apt-get install oracle-java11-installer-local`
 
 **Step 2**: Preprocess corpus and building indexes
 
