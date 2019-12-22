@@ -19,7 +19,7 @@ For BioASQ, download the [PubMed](https://www.nlm.nih.gov/databases/download/pub
 
 `conda env create -f environment.yml`
 
-`conda activate deep-relevance-ranking-gpu-py3`
+`conda activate deep-relevance-ranking-gpu`
 
 The next steps must be executed from `./deep-relevance-ranking/model/baselines dir`.
 
