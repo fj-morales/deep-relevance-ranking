@@ -6,6 +6,11 @@ This is a modified fork of the [[deep-relevance-ranking original](https://github
 
 To replicate he effectiveness results for POSIT-DRMM+MV, please, follow the [[installation](https://github.com/nlpaueb/deep-relevance-ranking))] and [[running](https://github.com/nlpaueb/deep-relevance-ranking/tree/master/models/drmm)] instructions of the original repository.
 
+**For the following experiments, you require a copy of the document collections for Robust04 and BioASQ in natural language**
+
+For Robust04, visit the [NIST(https://trec.nist.gov/data/cd45/index.html)] website.
+For BioASQ, download the [PubMed(https://www.nlm.nih.gov/databases/download/pubmed_medline.html)] 2018 baseline collection. 
+
 ## Reproduction of BM25+extra model
 
 
@@ -15,9 +20,9 @@ To replicate he effectiveness results for POSIT-DRMM+MV, please, follow the [[in
 
 **Step 2**: Preprocess corpus and building indexes
 
-  `dataset=bioasq; python ir_indexing.py --dataset $dataset --preprocess --pool_size 10` 
+  `dataset=bioasq; python ir_indexing.py --dataset $dataset --data_dir=</path/to/pubmed/xmlfiles> --preprocess --pool_size 10` 
 
-  `dataset=robust; python ir_indexing.py --dataset $dataset`
+  `dataset=robust; python ir_indexing.py --dataset $dataset --data_dir=</path/to/robust04/xmlfiles>`
 
 **Step 3**: Queries and qrels preprocessing
 
